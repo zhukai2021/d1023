@@ -133,19 +133,89 @@ function drawFrame(){
   var g=S[idx]||S[0],cx=W/2,cy=H/2,t=performance.now()/1000;
 
   if(g.id==="cover"){
-    var s=1+Math.sin(t*3)*0.05;
+    var ci=260,t2=t,ci2=cy;
+    // 1. Central glowing core - pulsating energy ball
+    var pulse=1+Math.sin(t2*2)*0.1;
+    var gGrad=X.createRadialGradient(cx,ci,5,cx,ci,90*pulse);
+    gGrad.addColorStop(0,"rgba(102,126,234,0.7)");
+    gGrad.addColorStop(0.2,"rgba(102,126,234,0.35)");
+    gGrad.addColorStop(0.5,"rgba(118,75,162,0.15)");
+    gGrad.addColorStop(1,"transparent");
+    X.save();X.fillStyle=gGrad;
+    X.beginPath();X.arc(cx,ci,90*pulse,0,Math.PI*2);X.fill();X.restore();
+
+    // 2. Outer glow ring expanding
+    var ringP=(Math.sin(t2*1.5)*0.5+0.5);
+    X.save();X.strokeStyle="rgba(102,126,234,"+(0.3*ringP)+")";X.lineWidth=2*pulse;
+    X.shadowColor="rgba(102,126,234,0.3)";X.shadowBlur=20;
+    X.beginPath();X.arc(cx,ci,60+ringP*40,0,Math.PI*2);X.stroke();X.restore();
+
+    // 3. Orbiting particle ring (main) - 3D perspective
+    for(var i=0,no=35;i<no;i++){
+      var a=i/no*Math.PI*2+t2*0.7;
+      var r=95+Math.sin(t2*1.2+i*3)*15;
+      var px=cx+Math.cos(a)*r, py=ci+Math.sin(a)*r*0.35;
+      var sz=1.5+Math.sin(a*2+t2*3)*1.2, al=0.3+Math.sin(a+t2*2)*0.3;
+      X.save();X.fillStyle="rgba(130,150,255,"+al+")";
+      X.shadowColor="rgba(102,126,234,"+al*0.6+")";X.shadowBlur=12;
+      X.beginPath();X.arc(px,py,sz,0,Math.PI*2);X.fill();X.restore();
+    }
+
+    // 4. Counter-rotating inner ring (purple)
+    for(var i=0,ni=22;i<ni;i++){
+      var a=i/ni*Math.PI*2-t2*0.5;
+      var r=65+Math.sin(t2*1.8+i*2)*12;
+      var px=cx+Math.cos(a)*r, py=ci+Math.sin(a)*r*0.35;
+      var sz=1.2+Math.sin(a*3+t2*2)*1;
+      X.save();X.fillStyle="rgba(180,120,255,0.4)";
+      X.shadowColor="rgba(118,75,162,0.3)";X.shadowBlur=8;
+      X.beginPath();X.arc(px,py,sz,0,Math.PI*2);X.fill();X.restore();
+    }
+
+    // 5. Particle streams shooting outward
+    for(var i=0,ns=10;i<ns;i++){
+      var ba=i/ns*Math.PI*2+t2*0.2;
+      for(var j=0;j<6;j++){
+        var d=20+j*22+Math.sin(t2*2.5+i+j)*8;
+        var px=cx+Math.cos(ba)*d, py=ci+Math.sin(ba)*d*0.45;
+        var al=0.6-j*0.1, sz=3.5-j*0.5;
+        X.save();X.fillStyle="rgba(255,255,255,"+al+")";
+        X.shadowColor="rgba(102,126,234,"+al*0.7+")";X.shadowBlur=18;
+        X.beginPath();X.arc(px,py,Math.max(sz,0.5),0,Math.PI*2);X.fill();X.restore();
+      }
+    }
+
+    // 6. Floating sparkles
+    for(var i=0;i<10;i++){
+      var seed=(i*137+t2*800)%2000;
+      var sx=cx-150+(seed%300), sy=ci-120+(seed*0.7%240);
+      var sa=Math.sin(t2*4+i*2.3)*0.5+0.5;
+      X.save();X.fillStyle="rgba(255,255,255,"+sa*0.9+")";
+      X.shadowColor="rgba(200,200,255,"+sa*0.6+")";X.shadowBlur=25;
+      X.beginPath();X.arc(sx,sy,1.5+sa,0,Math.PI*2);X.fill();X.restore();
+    }
+
+    // 7. Icon with intense glow
     X.save();
-    X.shadowColor="#667eea60";X.shadowBlur=40;
-    X.beginPath();X.arc(cx,260,65*s,0,Math.PI*2);
-    X.fillStyle="#667eea30";X.fill();X.strokeStyle="#667eea80";X.lineWidth=2;X.stroke();
-    X.shadowBlur=0;X.font='60px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
-    X.fillText("\uD83D\uDCE1",cx,260);X.restore();
-    X.save();X.shadowColor="rgba(0,0,0,0.5)";X.shadowBlur=15;
+    X.shadowColor="#667eea80";X.shadowBlur=60;
+    X.font='55px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillText("\uD83D\uDCE1",cx,ci);X.restore();
+
+    // 8. Title with fade-in entrance
+    var tA=Math.min(1,t2*0.5), tY=370-12*Math.exp(-t2*2.5);
+    X.save();X.globalAlpha=tA;
+    X.shadowColor="rgba(102,126,234,0.7)";X.shadowBlur=20;
     X.font='bold 36px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
-    X.fillStyle="#fff";X.fillText("\u4ECA\u65E5\u79D1\u6280\u65B0\u95FB",cx,370);X.restore();
-    X.save();X.font='20px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
-    X.fillStyle="rgba(255,255,255,0.6)";X.fillText("2026\u5E748\u67086\u65E5",cx,420);X.restore();
-    X.save();X.font='16px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";
+    X.fillStyle="#fff";X.fillText("\u4ECA\u65E5\u79D1\u6280\u65B0\u95FB",cx,tY);X.restore();
+
+    // 9. Date fade-in
+    X.save();X.globalAlpha=Math.min(1,(t2-0.4)*0.6);
+    X.font='20px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle="rgba(255,255,255,0.65)";X.fillText("2026\u5E748\u67086\u65E5",cx,420);X.restore();
+
+    // 10. Subtitle
+    X.save();X.globalAlpha=Math.min(1,(t2-0.8)*0.5);
+    X.font='16px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";
     X.fillStyle="rgba(255,255,255,0.4)";X.fillText("\u79D1\u6280\u65E5\u62A5\u00B7\u6BCF\u65E5\u7CBE\u9009",cx,460);X.restore();
   }else if(g.id==="outro"){
     X.save();X.shadowColor="rgba(0,0,0,0.5)";X.shadowBlur=15;
