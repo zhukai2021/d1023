@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老黄历 · 2026.8.6</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a0a0a;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'STKaiti','KaiTi','Microsoft YaHei','PingFang SC',serif}
+#player{width:450px;height:800px;position:relative;background:#1a0808;border-radius:20px;overflow:hidden;box-shadow:0 0 60px rgba(180,50,0,0.2);border:1px solid rgba(200,100,0,0.15)}
+canvas{display:block;width:100%;height:100%}
+@media(max-width:500px){#player{width:100vw;height:177.78vw;border-radius:0}}
+</style>
+</head>
+<body>
+<div id="player">
+<canvas id="canvas"></canvas>
+</div>
+<script>
+var C=document.getElementById("canvas"),X=C.getContext("2d"),W=450,H=800;
+C.width=W;C.height=H;
+
+// 黄历数据
+var DATA={
+  yearGZ:"丙午",yearAnimal:"马",monthGZ:"乙未",dayGZ:"壬子",
+  lunar:"六月廿四",week:"星期四",
+  yi:["沐浴","理发","捕捉","入殓","移柩","破土","启攒","安葬"],
+  ji:["出火","嫁娶","入宅","作灶","破土","上梁","动土"],
+  chong:"鼠", sui:"鼠",
+  wuxing:"桑柘木",
+  shen:"天德",
+  caishen:"正北", xishen:"东北", fumen:"东南"
+};
+
+// Particles - floating lanterns and sparkles
+var P=[];
+for(var i=0;i<12;i++){
+  P.push({
+    x:Math.random()*W,y:Math.random()*H,
+    s:2+Math.random()*3,spd:0.2+Math.random()*0.3,
+    drift:(Math.random()-0.5)*0.3,
+    o:0.3+Math.random()*0.4,
+    phase:Math.random()*Math.PI*2,
+    type:"lantern"
+  });
+}
+for(var i=0;i<30;i++){
+  P.push({
+    x:Math.random()*W,y:Math.random()*H,
+    s:0.5+Math.random()*1.5,spd:0.1+Math.random()*0.2,
+    drift:(Math.random()-0.5)*0.2,
+    o:0.1+Math.random()*0.3,
+    phase:Math.random()*Math.PI*2,
+    type:"sparkle"
+  });
+}
+
+// Decorative particles for orbit
+var OP=[];
+for(var i=0;i<24;i++){
+  var a=i/24*Math.PI*2;
+  OP.push({angle:a,radius:160+Math.random()*30,speed:0.3+Math.random()*0.2,size:2+Math.random()*2,phase:Math.random()*Math.PI*2});
+}
+
+var t=0,startTime=performance.now();
+
+function drawBg(){
+  var g=X.createRadialGradient(W/2,300,50,W/2,300,500);
+  g.addColorStop(0,"#2a0a0a");
+  g.addColorStop(0.5,"#1a0808");
+  g.addColorStop(1,"#0a0000");
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+}
+
+function drawBorder(){
+  // Decorative border
+  X.save();
+  X.strokeStyle="rgba(200,100,50,0.3)";
+  X.lineWidth=1;
+  X.strokeRect(10,10,W-20,H-20);
+  // Corner ornaments
+  var corners=[[10,10],[W-10,10],[10,H-10],[W-10,H-10]];
+  corners.forEach(function(p){
+    X.beginPath();
+    X.arc(p[0],p[1],6,0,Math.PI*2);
+    X.strokeStyle="rgba(200,100,50,0.4)";
+    X.fillStyle="rgba(200,100,50,0.15)";
+    X.lineWidth=1.5;
+    X.fill();X.stroke();
+  });
+  X.restore();
+}
+
+function drawParticles(){
+  var now=performance.now()/1000;
+  P.forEach(function(p){
+    p.y-=p.spd;
+    p.x+=Math.sin(now*0.5+p.phase)*p.drift;
+    if(p.y<-10){p.y=H+10;p.x=Math.random()*W}
+    if(p.type==="lantern"){
+      X.save();
+      var alpha=p.o*0.5+Math.sin(now*2+p.phase)*0.2;
+      X.fillStyle="rgba(255,180,50,"+alpha+")";
+      X.shadowColor="rgba(255,100,0,"+alpha*0.3+")";
+      X.shadowBlur=15;
+      X.beginPath();X.arc(p.x,p.y,p.s,0,Math.PI*2);X.fill();
+      // Small glow dot
+      X.fillStyle="rgba(255,220,100,"+alpha*0.8+")";
+      X.beginPath();X.arc(p.x,p.y,p.s*0.4,0,Math.PI*2);X.fill();
+      X.restore();
+    }else{
+      X.save();
+      var alpha=p.o*Math.sin(now*2+p.phase)*0.5+0.5;
+      X.fillStyle="rgba(255,200,150,"+alpha+")";
+      X.beginPath();X.arc(p.x,p.y,p.s,0,Math.PI*2);X.fill();
+      X.restore();
+    }
+  });
+}
+
+function drawOrbitRing(){
+  var now=performance.now()/1000,cx=W/2,cy=H/2-20;
+  OP.forEach(function(p){
+    var a=p.angle+now*p.speed;
+    var r=p.radius+Math.sin(now*0.8+p.phase)*15;
+    var px=cx+Math.cos(a)*r, py=cy+Math.sin(a)*r*0.25;
+    var alpha=0.3+Math.sin(a*2+now)*0.2;
+    X.save();
+    X.fillStyle="rgba(200,100,50,"+alpha+")";
+    X.shadowColor="rgba(200,80,30,"+alpha*0.5+")";
+    X.shadowBlur=8;
+    X.beginPath();X.arc(px,py,p.size,0,Math.PI*2);X.fill();
+    X.restore();
+  });
+}
+
+function drawMain(){
+  var cx=W/2, now=performance.now()/1000;
+
+  // Title bar
+  X.save();
+  X.fillStyle="rgba(180,60,30,0.15)";
+  X.fillRect(40,25,W-80,38);
+  X.strokeStyle="rgba(200,100,50,0.3)";
+  X.lineWidth=1;
+  X.strokeRect(40,25,W-80,38);
+  X.font='bold 26px "STKaiti","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#e8c060";
+  X.shadowColor="rgba(200,100,0,0.3)";X.shadowBlur=8;
+  X.fillText("\u8001\u9EC4\u5386",cx,44);
+  X.restore();
+
+  // Gregorian date
+  X.save();
+  X.font='bold 22px "STKaiti","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#d4a050";
+  X.fillText("2026\u5E748\u67086\u65E5 \u661F\u671F\u56DB",cx,92);
+  X.restore();
+
+  // Separator line
+  X.save();
+  X.strokeStyle="rgba(200,100,50,0.25)";
+  X.lineWidth=1;
+  X.beginPath();X.moveTo(80,108);X.lineTo(W-80,108);X.stroke();
+  X.restore();
+
+  // Lunar date
+  X.save();
+  X.font='bold 28px "STKaiti","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#e8c060";
+  X.shadowColor="rgba(200,100,0,0.2)";X.shadowBlur=6;
+  X.fillText("\u519C\u5386 \u516D\u6708\u5EFF\u56DB",cx,140);
+  X.restore();
+
+  // Ganzhi & animal
+  X.save();
+  X.font='20px "STKaiti","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#c89050";
+  X.fillText("\u4E19\u5348\u5E74 \u3010\u9A6C\u5E74\u3011 \u4E59\u672A\u6708 \u58EC\u5B50\u65E5",cx,175);
+  X.restore();
+
+  // Five elements
+  X.save();
+  X.fillStyle="rgba(180,60,30,0.1)";
+  X.fillRect(130,192,190,28);
+  X.font='16px "STKaiti","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#b08040";
+  X.fillText("\u884C\uFF1A\u6851\u6893\u6728  \u795E\uFF1A\u5929\u5FB7  \u51B2\uFF1A\u9F20",cx,206);
+  X.restore();
+
+  // Auspicious directions
+  X.save();
+  X.font='14px "STKaiti","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#a07040";
+  X.fillText("\u8D22\u795E\uFF1A\u6B63\u5317  \u559C\u795E\uFF1A\u4E1C\u5317  \u798F\u95E8\uFF1A\u4E1C\u5357",cx,230);
+  X.restore();
+
+  // Separator
+  X.save();
+  X.strokeStyle="rgba(200,100,50,0.2)";
+  X.lineWidth=1;
+  X.beginPath();X.moveTo(60,245);X.lineTo(W-60,245);X.stroke();
+  X.restore();
+
+  // Yi section
+  X.save();
+  X.fillStyle="rgba(0,100,50,0.08)";
+  X.fillRect(30,258,W-60,175);
+  X.strokeStyle="rgba(0,150,80,0.2)";
+  X.lineWidth=1;
+  X.strokeRect(30,258,W-60,175);
+  X.font='bold 20px "STKaiTi","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#50c080";
+  X.shadowColor="rgba(0,200,100,0.2)";X.shadowBlur=4;
+  X.fillText("\u5B9C",cx,280);
+  X.restore();
+
+  // Yi items
+  X.save();
+  X.font='15px "STKaiti","KaiTi",serif';
+  X.textAlign="left";X.textBaseline="middle";
+  X.fillStyle="#80d0a0";
+  var yiItems=DATA.yi;
+  for(var i=0;i<yiItems.length;i++){
+    var col=Math.floor(i/4), row=i%4;
+    var ix=65+col*180, iy=310+row*28;
+    X.fillText("\u25C6 "+yiItems[i],ix,iy);
+  }
+  X.restore();
+
+  // Ji section
+  X.save();
+  X.fillStyle="rgba(150,30,30,0.08)";
+  X.fillRect(30,445,W-60,155);
+  X.strokeStyle="rgba(200,50,50,0.2)";
+  X.lineWidth=1;
+  X.strokeRect(30,445,W-60,155);
+  X.font='bold 20px "STKaiTi","KaiTi",serif';
+  X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#d06060";
+  X.shadowColor="rgba(200,0,0,0.2)";X.shadowBlur=4;
+  X.fillText("\u5FCC",cx,467);
+  X.restore();
+
+  // Ji items
+  X.save();
+  X.font='15px "STKaiti","KaiTi",serif';
+  X.textAlign="left";X.textBaseline="middle";
+  X.fillStyle="#c08080";
+  var jiItems=DATA.ji;
+  for(var i=0;i<jiItems.length;i++){
+    var col=Math.floor(i/4), row=i%4;
+    var ix=65+col*180, iy=497+row*28;
+    X.fillText("\u25C7 "+jiItems[i],ix,iy);
+  }
+  X.restore();
+
+  // Bottom decorative text
+  X.save();
+  var alpha=Math.sin(now*1.5)*0.3+0.3;
+  X.font='14px "STKaiti","KaiTi",serif';
+  X.textAlign="center";
+  X.fillStyle="rgba(200,100,50,"+alpha+")";
+  X.fillText("\u2014 \u5409\u65E5\u7C4C\u5386 \u00B7 \u65E5\u51FA\u800C\u4F5C \u2014",cx,740);
+  X.restore();
+
+  // Bottom motto
+  X.save();
+  X.font='12px "STKaiti","KaiTi",serif';
+  X.textAlign="center";
+  X.fillStyle="rgba(200,100,50,0.2)";
+  X.fillText("\u7A4D\u5584\u4E4B\u5BB6 \u5FC5\u6709\u4F59\u5E86",cx,770);
+  X.restore();
+}
+
+function drawFadeIn(){
+  var elapsed=(performance.now()-startTime)/1000;
+  if(elapsed<1.5){
+    var alpha=Math.min(1,elapsed/0.8);
+    X.save();
+    X.fillStyle="rgba(0,0,0,"+(1-alpha)+")";
+    X.fillRect(0,0,W,H);
+    X.restore();
+  }
+}
+
+function frame(){
+  X.clearRect(0,0,W,H);
+  drawBg();
+  drawParticles();
+  drawOrbitRing();
+  drawBorder();
+  drawMain();
+  drawFadeIn();
+  requestAnimationFrame(frame);
+}
+
+frame();
+</script>
+</body>
+</html>
