@@ -3,224 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>科学日报 · 2026.8.7</title>
+<title>📁 d1023 - 文件浏览器</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0e1a;color:#e0e8f0;font-family:'Inter','Microsoft YaHei','PingFang SC',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center}
-#app{width:450px;min-height:800px;background:#0d1225;border-radius:24px;overflow:hidden;box-shadow:0 0 80px rgba(0,80,200,0.08),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);position:relative;padding:20px 18px 30px}
-@media(max-width:500px){#app{width:100vw;min-height:100vh;border-radius:0}}
-
-/* Animated background particles */
-#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
-#app>*{position:relative;z-index:1}
-
-/* Header */
-.header{text-align:center;padding:6px 0 14px;border-bottom:1px solid rgba(255,255,255,0.04);margin-bottom:16px}
-.clock{font-size:36px;font-weight:700;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
-.date-row{display:flex;justify-content:center;gap:12px;margin-top:4px;font-size:13px;color:rgba(255,255,255,0.5)}
-.lunar{color:rgba(255,200,100,0.6)}
-
-/* Section title */
-.section{margin-top:18px;display:flex;align-items:center;gap:10px}
-.section .icon{font-size:18px}
-.section h2{font-size:15px;font-weight:600;color:rgba(255,255,255,0.8);letter-spacing:1px;text-transform:uppercase}
-.section .line{flex:1;height:1px;background:linear-gradient(90deg,rgba(96,165,250,0.3),transparent)}
-
-/* Card grid */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-
-/* Card */
-.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;transition:0.3s;cursor:default}
-.card:hover{background:rgba(255,255,255,0.06);border-color:rgba(96,165,250,0.2)}
-.card .card-icon{font-size:20px;margin-bottom:4px}
-.card .card-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.7)}
-.card .card-desc{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;line-height:1.4}
-
-/* Highlight card */
-.card.highlight{border-left:2px solid rgba(96,165,250,0.4)}
-.card.highlight.green{border-left-color:rgba(52,211,153,0.4)}
-.card.highlight.amber{border-left-color:rgba(251,191,36,0.4)}
-.card.highlight.purple{border-left-color:rgba(167,139,250,0.4)}
-
-/* History list */
-.history-list{margin-top:8px}
-.history-item{display:flex;gap:10px;padding:8px 10px;border-radius:8px;transition:0.2s}
-.history-item:hover{background:rgba(255,255,255,0.03)}
-.history-year{font-size:13px;font-weight:700;color:#60a5fa;min-width:42px;padding-top:1px}
-.history-text{font-size:12px;color:rgba(255,255,255,0.65);line-height:1.5}
-
-/* Laohuangli */
-.lhl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.lhl-card{background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.04)}
-.lhl-card .lhl-label{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px}
-.lhl-card .lhl-value{font-size:13px;font-weight:600;margin-top:3px;color:rgba(255,255,255,0.8)}
-.lhl-card .lhl-value.yi,.lhl-card .lhl-value.col-green{color:#34d399}
-.lhl-card .lhl-value.ji,.lhl-card .lhl-value.col-rose{color:#fb7185}
-
-/* Links section */
-.links{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.link-btn{flex:1;min-width:90px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);text-decoration:none;transition:0.3s;cursor:pointer}
-.link-btn:hover{background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.2)}
-.link-btn .lb-icon{font-size:22px}
-.link-btn .lb-label{font-size:10px;color:rgba(255,255,255,0.5);text-align:center;line-height:1.2}
-.link-btn:hover .lb-label{color:rgba(255,255,255,0.8)}
-
-/* Fun fact */
-.fun-fact{margin-top:12px;padding:10px 12px;background:rgba(96,165,250,0.04);border:1px solid rgba(96,165,250,0.08);border-radius:10px;display:flex;align-items:flex-start;gap:8px}
-.fun-fact .ff-icon{font-size:16px;padding-top:1px}
-.fun-fact .ff-text{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5}
-.fun-fact .ff-text strong{color:rgba(255,255,255,0.8)}
-
-/* Footer */
-.footer{text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);font-size:10px;color:rgba(255,255,255,0.15)}
+body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:#1a1a2e;min-height:100vh}
+.container{max-width:800px;margin:0 auto;padding:20px 16px 60px}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;padding:28px 24px;margin-bottom:24px;color:#fff;box-shadow:0 4px 20px rgba(102,126,234,0.3)}
+.header h1{font-size:24px;font-weight:700;margin-bottom:6px}
+.header p{font-size:14px;opacity:0.85;line-height:1.6}
+.header .meta{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.header .meta span{background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px}
+.repo-path{display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:10px 16px;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);font-size:13px;color:#666}
+.repo-path .gh-link{color:#667eea;text-decoration:none;font-weight:500}
+.repo-path .gh-link:hover{text-decoration:underline}
+.file-list{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden}
+.file-item{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f5;transition:background 0.15s;text-decoration:none;color:inherit;cursor:pointer}
+.file-item:last-child{border-bottom:none}
+.file-item:hover{background:#f8f9ff}
+.file-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;margin-right:14px}
+.file-icon.html{background:#e8f4fd;color:#3498db}
+.file-icon.md{background:#f0f0f5;color:#7f8c8d}
+.file-icon.folder{background:#fef6e0;color:#f39c12}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:15px;font-weight:600;color:#1a1a2e;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.file-name .tag{font-size:10px;padding:1px 8px;border-radius:10px;font-weight:500;background:#e8f4fd;color:#3498db}
+.file-name .tag.new{background:#e8f8e8;color:#27ae60}
+.file-desc{font-size:12px;color:#999;line-height:1.4;margin-top:2px}
+.file-size{font-size:12px;color:#b0b0b0;white-space:nowrap;margin-left:12px;flex-shrink:0}
+.file-arrow{color:#ccc;margin-left:8px;font-size:14px;flex-shrink:0}
+.categories{margin-top:24px}
+.cat-title{font-size:13px;font-weight:600;color:#999;padding:0 20px;margin-bottom:10px;letter-spacing:0.5px}
+.footer{text-align:center;padding:20px;font-size:12px;color:#bbb}
+.footer a{color:#667eea;text-decoration:none}
+@media(max-width:500px){.container{padding:12px 10px 40px}.header{padding:20px 16px}.file-item{padding:12px 14px}}
 </style>
 </head>
 <body>
-<canvas id="bg-canvas"></canvas>
-<div id="app">
+<div class="container">
+  <div class="header">
+    <h1>📁 d1023</h1>
+    <p>zhukai2021 的公共仓库 · GitHub Pages 静态站点</p>
+    <div class="meta">
+      <span>🌐 <a href="https://zhukai2021.github.io/d1023/" style="color:#fff;text-decoration:underline">zhukai2021.github.io/d1023</a></span>
+      <span>📄 5 个文件</span>
+      <span>🔗 <a href="https://github.com/zhukai2021/d1023" style="color:#fff;text-decoration:underline">GitHub 仓库</a></span>
+    </div>
+  </div>
 
-<!-- Header: Clock + Date -->
-<div class="header">
-  <div class="clock" id="clock">--:--:--</div>
-  <div class="date-row">
-    <span>2026年8月7日 星期五</span>
-    <span class="lunar">农历六月廿五 · 丙午年</span>
+  <div class="repo-path">
+    <span>📂</span>
+    <span>/</span>
+    <a class="gh-link" href="https://github.com/zhukai2021/d1023">zhukai2021/d1023</a>
+    <span style="color:#ccc;margin:0 4px">/</span>
+    <span style="color:#333">main</span>
+    <span style="margin-left:auto;font-size:11px;color:#bbb">GitHub Pages</span>
+  </div>
+
+  <div class="categories">
+    <div class="cat-title">📄 文件列表</div>
+    <div class="file-list">
+
+      <a class="file-item" href="picture_book.html">
+        <div class="file-icon html">📖</div>
+        <div class="file-info">
+          <div class="file-name">
+            picture_book.html
+            <span class="tag new">NEW</span>
+          </div>
+          <div class="file-desc">🌟 小星星找朋友 · 儿童绘本互动动画，中文配音自动翻页</div>
+        </div>
+        <div class="file-size">16 KB</div>
+        <div class="file-arrow">→</div>
+      </a>
+
+      <a class="file-item" href="dashboard.html">
+        <div class="file-icon html">🪐</div>
+        <div class="file-info">
+          <div class="file-name">
+            dashboard.html
+            <span class="tag new">NEW</span>
+          </div>
+          <div class="file-desc">📊 科学日报信息面板 · 今日科技+历史上的今天+黄历</div>
+        </div>
+        <div class="file-size">9 KB</div>
+        <div class="file-arrow">→</div>
+      </a>
+
+      <a class="file-item" href="index.html" onclick="event.preventDefault();alert('👋 你当前就在这个页面哦！');">
+        <div class="file-icon html">🗺️</div>
+        <div class="file-info">
+          <div class="file-name">
+            index.html
+            <span class="tag">当前</span>
+          </div>
+          <div class="file-desc">📂 文件浏览器（就是本页）</div>
+        </div>
+        <div class="file-size">—</div>
+        <div class="file-arrow">•</div>
+      </a>
+
+      <a class="file-item" href="hyperframes_0806.html">
+        <div class="file-icon html">📡</div>
+        <div class="file-info">
+          <div class="file-name">
+            hyperframes_0806.html
+          </div>
+          <div class="file-desc">📰 今日科技新闻 · 2026.8.6 竖屏动画配音视频</div>
+        </div>
+        <div class="file-size">301 KB</div>
+        <div class="file-arrow">→</div>
+      </a>
+
+      <a class="file-item" href="README.md">
+        <div class="file-icon md">📝</div>
+        <div class="file-info">
+          <div class="file-name">
+            README.md
+          </div>
+          <div class="file-desc">📄 仓库说明文档</div>
+        </div>
+        <div class="file-size">—</div>
+        <div class="file-arrow">→</div>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="categories" style="margin-top:30px">
+    <div class="cat-title">🗺️ 历史项目</div>
+    <div class="file-list">
+
+      <a class="file-item" href="https://mcp.edgeone.site/share/Nx8wLgWLvOMVGK7JYh3T9" target="_blank">
+        <div class="file-icon folder">🗺️</div>
+        <div class="file-info">
+          <div class="file-name">
+            临沂市行政区划交互地图
+            <span class="tag">EdgeOne</span>
+          </div>
+          <div class="file-desc">156 个乡镇标注 · 13 个区县彩色边界 · 搜索框 · 图例交互</div>
+        </div>
+        <div class="file-arrow">↗</div>
+      </a>
+
+      <a class="file-item" href="https://mcp.edgeone.site/share/_9ghlHjuK8ruq1eFpFqCx" target="_blank">
+        <div class="file-icon folder">📡</div>
+        <div class="file-info">
+          <div class="file-name">
+            科技新闻 Hyperframes v1
+            <span class="tag">EdgeOne</span>
+          </div>
+          <div class="file-desc">12KB 纯 HTML · Web Speech API 配音 · 粒子背景</div>
+        </div>
+        <div class="file-arrow">↗</div>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="https://github.com/zhukai2021/d1023">zhukai2021/d1023</a> · GitHub Pages · 2026
   </div>
 </div>
-
-<!-- 1. 今日科技新闻 -->
-<div class="section"><span class="icon">📡</span><h2>今日科技</h2><div class="line"></div></div>
-<div class="grid">
-  <div class="card highlight">
-    <div class="card-icon">🧠</div>
-    <div class="card-title">字节跳动坚持大模型自研</div>
-    <div class="card-desc">CEO梁汝波：接受短期落后，优化长期</div>
-  </div>
-  <div class="card highlight green">
-    <div class="card-icon">🤖</div>
-    <div class="card-title">具身智能一天投5亿</div>
-    <div class="card-desc">具身大模型打响头部卡位战</div>
-  </div>
-  <div class="card highlight amber">
-    <div class="card-icon">🚀</div>
-    <div class="card-title">商业航天融资翻3.7倍</div>
-    <div class="card-desc">近七成资金涌向头部企业</div>
-  </div>
-  <div class="card highlight purple">
-    <div class="card-icon">🦾</div>
-    <div class="card-title">宇树市值600亿</div>
-    <div class="card-desc">DeepSeek现身战略配售</div>
-  </div>
-</div>
-
-<!-- 2. 历史上的今天 -->
-<div class="section"><span class="icon">📜</span><h2>历史上的今天 · 8月7日</h2><div class="line"></div></div>
-<div class="history-list">
-  <div class="history-item"><span class="history-year">2007</span><span class="history-text">美国"凤凰"号火星探测器发射升空，前往火星北极探测水冰</span></div>
-  <div class="history-item"><span class="history-year">1984</span><span class="history-text">中国女排在第23届洛杉矶奥运会上夺得金牌，实现"三连冠"</span></div>
-  <div class="history-item"><span class="history-year">1976</span><span class="history-text">美国"海盗2号"探测器进入火星轨道，传回火星表面高清图像</span></div>
-  <div class="history-item"><span class="history-year">1960</span><span class="history-text">古巴宣布将美国在古巴的全部财产收归国有</span></div>
-  <div class="history-item"><span class="history-year">1941</span><span class="history-text">印度诗人、哲学家泰戈尔逝世，享年80岁</span></div>
-  <div class="history-item"><span class="history-year">2010</span><span class="history-text">甘肃舟曲发生特大山洪泥石流灾害，造成重大人员伤亡</span></div>
-</div>
-
-<!-- 3. 老黄历 -->
-<div class="section"><span class="icon">🏮</span><h2>今日黄历</h2><div class="line"></div></div>
-<div class="lhl-grid">
-  <div class="lhl-card">
-    <div class="lhl-label">农历</div>
-    <div class="lhl-value">六月廿五</div>
-  </div>
-  <div class="lhl-card">
-    <div class="lhl-label">干支</div>
-    <div class="lhl-value">丙午·乙未·癸丑</div>
-  </div>
-  <div class="lhl-card">
-    <div class="lhl-label">宜</div>
-    <div class="lhl-value yi">祭祀 · 求医 · 捕捉 · 栽种</div>
-  </div>
-  <div class="lhl-card">
-    <div class="lhl-label">忌</div>
-    <div class="lhl-value ji">诸事不宜</div>
-  </div>
-  <div class="lhl-card">
-    <div class="lhl-label">冲煞</div>
-    <div class="lhl-value">冲羊 · 煞东</div>
-  </div>
-  <div class="lhl-card">
-    <div class="lhl-label">五行</div>
-    <div class="lhl-value">桑柘木</div>
-  </div>
-</div>
-
-<!-- 4. 快捷入口 -->
-<div class="section"><span class="icon">🔗</span><h2>项目导航</h2><div class="line"></div></div>
-<div class="links">
-  <a href="hyperframes_0806.html" class="link-btn">
-    <span class="lb-icon">📡</span>
-    <span class="lb-label">科技新闻<br>配音动画</span>
-  </a>
-  <a href="laohuangli.html" class="link-btn">
-    <span class="lb-icon">🏮</span>
-    <span class="lb-label">老黄历<br>传统宜忌</span>
-  </a>
-  <a href="picture_book.html" class="link-btn">
-    <span class="lb-icon">📖</span>
-    <span class="lb-label">儿童绘本<br>星星故事</span>
-  </a>
-</div>
-
-<!-- 5. Fun Fact -->
-<div class="fun-fact">
-  <span class="ff-icon">💡</span>
-  <div class="ff-text"><strong>科学小知识：</strong> 火星上的一天（太阳日）约为24小时39分钟，仅比地球长39分钟。但火星的一年相当于地球的687天，几乎是地球的两倍。</div>
-</div>
-
-<!-- Footer -->
-<div class="footer">科学日报 · 每日更新 · ☀️</div>
-
-</div>
-
-<script>
-// Canvas background particles
-var C=document.getElementById("bg-canvas"),X=C.getContext("2d");
-function resize(){C.width=window.innerWidth;C.height=window.innerHeight}
-resize();window.addEventListener("resize",resize);
-
-var P=[];
-for(var i=0;i<60;i++){
-  P.push({
-    x:Math.random()*C.width,y:Math.random()*C.height,
-    s:0.5+Math.random()*1.5,spd:0.05+Math.random()*0.15,
-    drift:(Math.random()-0.5)*0.1,o:0.1+Math.random()*0.4,
-    phase:Math.random()*Math.PI*2
-  });
-}
-
-function drawBg(){
-  X.clearRect(0,0,C.width,C.height);
-  var t=performance.now()/1000;
-  P.forEach(function(p){
-    p.y-=p.spd;p.x+=Math.sin(t*0.3+p.phase)*p.drift;
-    if(p.y<-10){p.y=C.height+10;p.x=Math.random()*C.width}
-    var a=p.o*0.5+Math.sin(t*1.5+p.phase)*0.2;
-    X.fillStyle="rgba(96,165,250,"+a+")";
-    X.beginPath();X.arc(p.x,p.y,p.s,0,Math.PI*2);X.fill();
-  });
-  requestAnimationFrame(drawBg);
-}
-drawBg();
-
-// Real-time clock
-function updateClock(){
-  var d=new Date();
-  var h=String(d.getUTCHours()+8).padStart(2,"0");
-  var m=String(d.getMinutes()).padStart(2,"0");
-  var s=String(d.getSeconds()).padStart(2,"0");
-  document.getElementById("clock").textContent=h+":"+m+":"+s;
-}
-setInterval(updateClock,1000);updateClock();
-</script>
 </body>
 </html>
