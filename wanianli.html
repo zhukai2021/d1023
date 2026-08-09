@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>万年历 · 2026.8.8</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;color:#e0e8f0;font-family:'Microsoft YaHei','PingFang SC',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center}
+#app{width:450px;min-height:800px;background:linear-gradient(160deg,#0d1225 0%,#141a35 100%);border-radius:24px;overflow:hidden;box-shadow:0 0 80px rgba(0,80,200,0.08),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);position:relative;padding:0}
+@media(max-width:500px){#app{width:100vw;min-height:100vh;border-radius:0}}
+
+/* Decorative top bar */
+.top-bar{height:4px;background:linear-gradient(90deg,#6366f1,#a78bfa,#f472b6,#fbbf24);width:100%}
+
+/* Header section */
+.header{text-align:center;padding:24px 20px 16px;position:relative}
+.header .year{font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:4px;text-transform:uppercase}
+.header .date-main{font-size:52px;font-weight:700;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin-top:4px}
+.header .date-sub{font-size:14px;color:rgba(255,255,255,0.5);margin-top:6px;display:flex;justify-content:center;gap:16px;align-items:center}
+.header .date-sub .weekday{color:rgba(167,139,250,0.8);font-weight:600}
+.header .lunar-box{display:inline-flex;align-items:center;gap:4px;margin-top:10px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.15);padding:4px 14px;border-radius:20px;font-size:13px;color:rgba(251,191,36,0.8)}
+.header .lunar-box .lunar-icon{font-size:14px}
+.header .ganzhi{font-size:12px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:1px}
+
+/* Divider */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);margin:0 20px}
+
+/* Solar term notice */
+.term-banner{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;background:linear-gradient(90deg,transparent,rgba(99,102,241,0.06),transparent);margin:0 0 4px}
+.term-banner .term-icon{font-size:16px}
+.term-banner .term-text{font-size:12px;color:rgba(255,255,255,0.5)}
+.term-banner .term-text strong{color:#60a5fa}
+
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,0.04);margin:8px 16px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.04)}
+.info-item{background:#0d1225;padding:12px 14px}
+.info-item .label{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.info-item .value{font-size:14px;font-weight:600;color:rgba(255,255,255,0.85)}
+.info-item .value.blue{color:#60a5fa}
+.info-item .value.green{color:#34d399}
+.info-item .value.rose{color:#fb7185}
+.info-item .value.amber{color:#fbbf24}
+.info-item .value.purple{color:#a78bfa}
+
+/* Yi/Ji section */
+.yiji-section{margin:10px 16px 6px;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04)}
+.yiji-row{display:flex;gap:12px;margin-bottom:8px}
+.yiji-row:last-child{margin-bottom:0}
+.yiji-label{font-size:14px;font-weight:700;min-width:32px;padding-top:2px}
+.yiji-label.yi{color:#34d399}
+.yiji-label.ji{color:#fb7185}
+.yiji-tags{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.yiji-tag{font-size:11px;padding:2px 10px;border-radius:12px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.06)}
+.yiji-tag.yi{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.15);color:rgba(52,211,153,0.8)}
+.yiji-tag.ji{background:rgba(251,113,133,0.06);border-color:rgba(251,113,133,0.15);color:rgba(251,113,133,0.8)}
+
+/* Calendar month grid */
+.month-title{margin:14px 20px 6px;font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin:0 16px;}
+.month-grid .day-header{padding:6px 0;text-align:center;font-size:10px;color:rgba(255,255,255,0.25);font-weight:500}
+.month-grid .day{text-align:center;padding:6px 0;border-radius:6px;font-size:13px;color:rgba(255,255,255,0.6);transition:0.2s;position:relative}
+.month-grid .day .lunar-day{display:block;font-size:7px;color:rgba(255,255,255,0.2);margin-top:1px}
+.month-grid .day.today{background:rgba(96,165,250,0.15);color:#60a5fa;font-weight:700}
+.month-grid .day.today .lunar-day{color:rgba(96,165,250,0.5)}
+.month-grid .day.weekend{color:rgba(251,113,133,0.5)}
+.month-grid .day.festival{color:#fbbf24}
+.month-grid .day.jieqi{color:#60a5fa}
+.month-grid .day.other-month{color:rgba(255,255,255,0.15)}
+.month-grid .day .dot{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:#60a5fa;opacity:0}
+
+/* Footer */
+.footer{text-align:center;padding:16px 20px 20px;font-size:10px;color:rgba(255,255,255,0.1);letter-spacing:1px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top-bar"></div>
+  
+  <!-- Header -->
+  <div class="header">
+    <div class="year">二〇二六 · 丙午马年</div>
+    <div class="date-main">8月8日</div>
+    <div class="date-sub">
+      <span class="weekday">星期六</span>
+      <span>·</span>
+      <span>第32周</span>
+    </div>
+    <div class="lunar-box">
+      <span class="lunar-icon">🏮</span>
+      <span>农历六月廿六</span>
+    </div>
+    <div class="ganzhi">丙午年 · 丙申月 · 甲寅日</div>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <!-- Solar term -->
+  <div class="term-banner">
+    <span class="term-icon">🍂</span>
+    <span class="term-text">昨日 <strong>立秋</strong> · 一叶知秋，暑去凉来</span>
+  </div>
+  
+  <!-- Info Grid -->
+  <div class="info-grid">
+    <div class="info-item">
+      <div class="label">生肖</div>
+      <div class="value amber">🐎 马年</div>
+    </div>
+    <div class="info-item">
+      <div class="label">五行</div>
+      <div class="value blue">大溪水</div>
+    </div>
+    <div class="info-item">
+      <div class="label">冲煞</div>
+      <div class="value rose">冲猴 · 煞北</div>
+    </div>
+    <div class="info-item">
+      <div class="label">星座</div>
+      <div class="value purple">🦁 狮子座</div>
+    </div>
+  </div>
+  
+  <!-- 宜忌 -->
+  <div class="yiji-section">
+    <div class="yiji-row">
+      <div class="yiji-label yi">宜</div>
+      <div class="yiji-tags">
+        <span class="yiji-tag yi">祭祀</span>
+        <span class="yiji-tag yi">解除</span>
+        <span class="yiji-tag yi">造畜稠</span>
+        <span class="yiji-tag yi">平治道涂</span>
+        <span class="yiji-tag yi">修饰垣墙</span>
+        <span class="yiji-tag yi">馀事勿取</span>
+      </div>
+    </div>
+    <div class="yiji-row">
+      <div class="yiji-label ji">忌</div>
+      <div class="yiji-tags">
+        <span class="yiji-tag ji">开业</span>
+        <span class="yiji-tag ji">结婚</span>
+        <span class="yiji-tag ji">入宅</span>
+        <span class="yiji-tag ji">领证</span>
+        <span class="yiji-tag ji">开工</span>
+        <span class="yiji-tag ji">安葬</span>
+        <span class="yiji-tag ji">交易</span>
+        <span class="yiji-tag ji">开市</span>
+        <span class="yiji-tag ji">嫁娶</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <!-- Calendar -->
+  <div class="month-title">📅 八月 · 丙申月</div>
+  <div class="month-grid">
+    <div class="day-header">一</div>
+    <div class="day-header">二</div>
+    <div class="day-header">三</div>
+    <div class="day-header">四</div>
+    <div class="day-header">五</div>
+    <div class="day-header">六</div>
+    <div class="day-header">日</div>
+    
+    <div class="day other-month">27<br><span class="lunar-day">十四</span></div>
+    <div class="day other-month">28<br><span class="lunar-day">十五</span></div>
+    <div class="day other-month">29<br><span class="lunar-day">十六</span></div>
+    <div class="day other-month">30<br><span class="lunar-day">十七</span></div>
+    <div class="day other-month">31<br><span class="lunar-day">十八</span></div>
+    <div class="day weekend">1<br><span class="lunar-day">建军节</span></div>
+    <div class="day weekend">2<br><span class="lunar-day">二十</span></div>
+    
+    <div class="day">3<br><span class="lunar-day">廿一</span></div>
+    <div class="day">4<br><span class="lunar-day">廿二</span></div>
+    <div class="day">5<br><span class="lunar-day">廿三</span></div>
+    <div class="day">6<br><span class="lunar-day">廿四</span></div>
+    <div class="day jieqi">7<br><span class="lunar-day">立秋</span></div>
+    <div class="day weekend today">8<br><span class="lunar-day">廿六</span></div>
+    <div class="day weekend">9<br><span class="lunar-day">廿七</span></div>
+    
+    <div class="day">10<br><span class="lunar-day">廿八</span></div>
+    <div class="day">11<br><span class="lunar-day">廿九</span></div>
+    <div class="day">12<br><span class="lunar-day">三十</span></div>
+    <div class="day">13<br><span class="lunar-day">初一</span></div>
+    <div class="day">14<br><span class="lunar-day">初二</span></div>
+    <div class="day weekend">15<br><span class="lunar-day">初三</span></div>
+    <div class="day weekend">16<br><span class="lunar-day">初四</span></div>
+    
+    <div class="day">17<br><span class="lunar-day">初五</span></div>
+    <div class="day">18<br><span class="lunar-day">初六</span></div>
+    <div class="day festival">19<br><span class="lunar-day">七夕</span></div>
+    <div class="day">20<br><span class="lunar-day">初八</span></div>
+    <div class="day">21<br><span class="lunar-day">初九</span></div>
+    <div class="day weekend">22<br><span class="lunar-day">初十</span></div>
+    <div class="day weekend jieqi">23<br><span class="lunar-day">处暑</span></div>
+    
+    <div class="day">24<br><span class="lunar-day">十二</span></div>
+    <div class="day">25<br><span class="lunar-day">十三</span></div>
+    <div class="day">26<br><span class="lunar-day">十四</span></div>
+    <div class="day festival">27<br><span class="lunar-day">中元</span></div>
+    <div class="day">28<br><span class="lunar-day">十六</span></div>
+    <div class="day weekend">29<br><span class="lunar-day">十七</span></div>
+    <div class="day weekend">30<br><span class="lunar-day">十八</span></div>
+    
+    <div class="day">31<br><span class="lunar-day">十九</span></div>
+    <div class="day other-month">1<br><span class="lunar-day">二十</span></div>
+    <div class="day other-month">2<br><span class="lunar-day">廿一</span></div>
+    <div class="day other-month">3<br><span class="lunar-day">廿二</span></div>
+    <div class="day other-month">4<br><span class="lunar-day">廿三</span></div>
+    <div class="day other-month">5<br><span class="lunar-day">廿四</span></div>
+    <div class="day other-month">6<br><span class="lunar-day">廿五</span></div>
+  </div>
+  
+  <div class="footer">万年历 · 每日更新</div>
+</div>
+</body>
+</html>

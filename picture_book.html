@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小星星找朋友 - 儿童绘本</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0e6d3;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Microsoft YaHei','PingFang SC',sans-serif}
+#player{width:450px;height:800px;position:relative;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.15),0 2px 10px rgba(0,0,0,0.1);border:3px solid #f8d7a0}
+canvas{display:block;width:100%;height:100%}
+#controls{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:10}
+#controls button{background:rgba(255,255,255,0.85);border:2px solid #f0c27a;color:#8b5e3c;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:20px;transition:0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+#controls button:hover{background:#f0c27a;color:#fff;transform:scale(1.05)}
+#progress{position:absolute;bottom:78px;left:30px;right:30px;height:4px;background:rgba(200,180,160,0.3);border-radius:4px;z-index:10;overflow:hidden}
+#progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#f0c27a,#f7a072);border-radius:4px;transition:width 0.3s}
+#status{position:absolute;bottom:128px;left:0;right:0;text-align:center;z-index:10;font-size:13px;color:#a08060;font-family:'Microsoft YaHei',sans-serif;pointer-events:none}
+#page-num{position:absolute;top:15px;right:20px;z-index:10;font-size:14px;color:#c0a080;font-family:'Microsoft YaHei',sans-serif;background:rgba(255,255,255,0.7);padding:4px 12px;border-radius:20px}
+@media(max-width:500px){#player{width:100vw;height:177.78vw;border-radius:0;border:none}}
+</style>
+</head>
+<body>
+<div id="player">
+<canvas id="canvas"></canvas>
+<div id="page-num">1 / 6</div>
+<div id="progress"><div id="progress-bar"></div></div>
+<div id="status">&#127916; 点击播放绘本</div>
+<div id="controls">
+<button id="playBtn">&#9654;</button>
+<button id="replayBtn">&#8634;</button>
+</div>
+</div>
+<script>
+// ===== 绘本内容 =====
+var STORY = [
+  {id:"cover", title:"\u2605 \u5C0F\u661F\u661F\u627E\u670B\u53CB", subtitle:"\u4E00\u4E2A\u6E29\u6696\u7684\u7AE5\u5E74\u6545\u4E8B", text:"\u5C0F\u670B\u53CB\u4EEC\uFF0C\u4F60\u597D\u554A\uFF01", color:"#f0c27a"},
+  {id:"s1", title:"\u5C0F\u661F\u661F\u8FF7\u8DEF\u4E86", text:"\u5728\u6F06\u9ED1\u7684\u591C\u7A7A\u4E2D\uFF0C\u6709\u4E00\u9897\u5C0F\u661F\u661F\u8FF7\u8DEF\u4E86\u3002\u5B83\u4E00\u4E2A\u4EBA\u5728\u5929\u4E0A\u98D8\u554A\u98D8\uFF0C\u89C9\u5F97\u597D\u5B64\u5355\u3002", color:"#6c5ce7"},
+  {id:"s2", title:"\u9047\u89C1\u6708\u4EAE\u5A46\u5A46", text:"\u6708\u4EAE\u5A46\u5A46\u770B\u89C1\u4E86\uFF0C\u8BF4\uFF1A\u201C\u5C0F\u661F\u661F\uFF0C\u4F60\u53EF\u4EE5\u548C\u6211\u4E00\u8D77\u7167\u4EAE\u591C\u7A7A\u554A\uFF01\u201D\u5C0F\u661F\u661F\u5F00\u5FC3\u5730\u7B11\u4E86\u3002", color:"#fdcb6e"},
+  {id:"s3", title:"\u9047\u89C1\u6D41\u661F\u5C0F\u5F1F", text:"\u6D41\u661F\u5C0F\u5F1F\u201C\u5575\u201D\u5730\u98DE\u8FC7\uFF0C\u8BF4\uFF1A\u201C\u5FEB\u6765\u554A\uFF0C\u6211\u5E26\u4F60\u53BB\u770B\u5E7D\u84DD\u661F\u4E91\uFF01\u201D\u4E24\u4E2A\u5C0F\u4F19\u4F34\u624B\u7275\u624B\u98DE\u5411\u8FDC\u65B9\u3002", color:"#a29bfe"},
+  {id:"s4", title:"\u5C0F\u5C0F\u661F\u661F\u4EEC", text:"\u5E7D\u84DD\u661F\u4E91\u91CC\u6709\u597D\u591A\u5C0F\u661F\u661F\uFF0C\u5B83\u4EEC\u5728\u8DF3\u821E\u3001\u5531\u6B4C\u3001\u73A9\u6E38\u620F\u3002\u5C0F\u661F\u661F\u518D\u4E5F\u4E0D\u5B64\u5355\u4E86\uFF0C\u5B83\u6709\u4E86\u8BB8\u8BB8\u591A\u591A\u7684\u670B\u53CB\u3002", color:"#fd79a8"},
+  {id:"outro", title:"\u2605 \u6545\u4E8B\u7ED3\u675F\u4E86", text:"\u5C0F\u661F\u661F\u660E\u767D\u4E86\uFF0C\u53EA\u8981\u52C7\u6562\u5730\u8D70\u51FA\u53BB\uFF0C\u5C31\u80FD\u9047\u89C1\u670B\u53CB\u3002\u665A\u5B89\uFF0C\u5C0F\u670B\u53CB\uFF0C\u795D\u4F60\u6709\u4E2A\u751C\u751C\u7684\u68A6\uFF01", color:"#f0c27a"}
+];
+
+var C=document.getElementById("canvas"),X=C.getContext("2d"),W=450,H=800;
+C.width=W;C.height=H;
+var B=document.getElementById("playBtn"),R=document.getElementById("replayBtn"),P=document.getElementById("progress-bar"),S0=document.getElementById("status"),PN=document.getElementById("page-num");
+
+// ===== 粒子系统（星星背景 + 萤火虫）=====
+function Pt(){this.x=Math.random()*W;this.y=Math.random()*H;this.s=Math.random()*2+1;this.o=Math.random()*0.6+0.2;this.yv=-(Math.random()*0.2+0.05);this.xv=(Math.random()-0.5)*0.1;this.twinkle=Math.random()*Math.PI*2}
+Pt.prototype.update=function(){this.y+=this.yv;this.x+=this.xv;this.twinkle+=0.03;if(this.y<-5){this.y=H+5;this.x=Math.random()*W}};
+Pt.prototype.draw=function(){var o=this.o*(0.5+0.5*Math.sin(this.twinkle));X.fillStyle="rgba(255,255,255,"+o+")";X.beginPath();X.arc(this.x,this.y,this.s,0,Math.PI*2);X.fill()};
+var stars=[];for(var i=0;i<50;i++)stars.push(new Pt());
+
+// ===== 萤火虫 =====
+function Firefly(){this.x=Math.random()*W;this.y=Math.random()*H;this.angle=Math.random()*Math.PI*2;this.speed=0.3+Math.random()*0.5;this.radius=20+Math.random()*30;this.glow=Math.random()*Math.PI*2;this.size=2+Math.random()*2}
+Firefly.prototype.update=function(){this.angle+=0.02;this.x+=Math.cos(this.angle)*this.speed;this.y+=Math.sin(this.angle)*this.speed*0.5;this.glow+=0.05;if(this.x<-20)this.x=W+20;if(this.x>W+20)this.x=-20;if(this.y<-20)this.y=H+20;if(this.y>H+20)this.y=-20};
+Firefly.prototype.draw=function(){var g=0.3+0.7*Math.sin(this.glow);X.save();X.globalAlpha=g*0.6;var grd=X.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*6);grd.addColorStop(0,"#ffd700");grd.addColorStop(0.5,"#ffa500");grd.addColorStop(1,"transparent");X.fillStyle=grd;X.beginPath();X.arc(this.x,this.y,this.size*6,0,Math.PI*2);X.fill();X.restore();X.save();X.globalAlpha=g;X.fillStyle="#ffd700";X.beginPath();X.arc(this.x,this.y,this.size,0,Math.PI*2);X.fill();X.restore()};
+var fireflies=[];for(var i=0;i<15;i++)fireflies.push(new Firefly());
+
+// ===== 花朵 =====
+function Flower(x,y,color,size){this.x=x;this.y=y;this.color=color;this.size=size;this.sway=Math.random()*Math.PI*2}
+Flower.prototype.draw=function(t){this.sway+=0.02;var s=Math.sin(this.sway)*3;X.save();X.translate(this.x,this.y);X.strokeStyle="#5a8a3c";X.lineWidth=2;X.beginPath();X.moveTo(0,0);X.lineTo(s,this.size*2);X.stroke();X.save();X.translate(s,this.size*2);for(var i=0;i<5;i++){X.save();X.rotate(i*Math.PI*2/5);X.fillStyle=this.color;X.beginPath();X.ellipse(0,-this.size*0.3,this.size*0.3,this.size*0.5,0,0,Math.PI*2);X.fill();X.restore()}X.fillStyle="#ffd700";X.beginPath();X.arc(0,0,this.size*0.15,0,Math.PI*2);X.fill();X.restore();X.restore()};
+var flowers=[];var flowerColors=["#ff6b6b","#ff9ff3","#ffd93d","#ff8a5c","#ff6b9d"];for(var i=0;i<20;i++)flowers.push(new Flower(30+Math.random()*(W-60),H-50-Math.random()*80,flowerColors[Math.floor(Math.random()*flowerColors.length)],8+Math.random()*6));
+
+// ===== TTS 配音 =====
+var synth=window.speechSynthesis;
+var currentIdx=0,playing=false,stopped=false,animFrame=null;
+
+function speak(idx,onEnd){
+  if(stopped)return;
+  var s=STORY[idx];
+  var t=s.subtitle?s.subtitle+"。"+s.text:s.text;
+  var u=new SpeechSynthesisUtterance(t);
+  u.lang="zh-CN";u.rate=0.95;u.pitch=1.1;u.volume=1;
+  u.onend=function(){if(!stopped&&playing)onEnd()};
+  u.onerror=function(){if(!stopped&&playing)onEnd()};
+  synth.speak(u);
+}
+
+// ===== 绘制场景 =====
+function drawScene(idx,t){
+  // 背景
+  var g=X.createLinearGradient(0,0,0,H);
+  if(idx===0){g.addColorStop(0,"#1a1a3e");g.addColorStop(0.6,"#2d1b69");g.addColorStop(1,"#0a0a1a")}
+  else if(idx===1){g.addColorStop(0,"#0c0c3a");g.addColorStop(0.5,"#1a1a5e");g.addColorStop(1,"#0a0a1a")}
+  else if(idx===2){g.addColorStop(0,"#1a1a5e");g.addColorStop(0.5,"#2d2d6e");g.addColorStop(1,"#1a1a4e")}
+  else if(idx===3){g.addColorStop(0,"#0d0d4a");g.addColorStop(0.5,"#1a1a5e");g.addColorStop(1,"#0a0a3a")}
+  else if(idx===4){g.addColorStop(0,"#1a1a5e");g.addColorStop(0.5,"#2d1b69");g.addColorStop(1,"#0a0a1a")}
+  else{g.addColorStop(0,"#1a1a3e");g.addColorStop(0.5,"#2d1b69");g.addColorStop(1,"#0a0a1a")}
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+
+  // 地面
+  X.save();X.fillStyle="rgba(60,120,60,0.3)";X.beginPath();X.moveTo(0,H-50);X.quadraticCurveTo(W/2,H-70,W,H-50);X.lineTo(W,H);X.lineTo(0,H);X.closePath();X.fill();X.restore();
+
+  // 星星粒子
+  stars.forEach(function(s){s.update();s.draw()});
+  fireflies.forEach(function(f){f.update();f.draw()});
+  flowers.forEach(function(f){f.draw(t)});
+
+  var cx=W/2,cy=H/2;
+  var story=STORY[idx];
+
+  if(idx===0){
+    // 封面：大星星 + 标题
+    var p=1+Math.sin(t*2)*0.05;
+    X.save();X.shadowColor="#ffd70060";X.shadowBlur=50;
+    X.beginPath();X.arc(cx,200,70*p,0,Math.PI*2);
+    X.fillStyle="#ffd70020";X.fill();X.strokeStyle="#ffd70080";X.lineWidth=2;X.stroke();
+    X.shadowBlur=0;X.font='72px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillText("\u2605",cx,200);X.restore();
+    X.save();X.shadowColor="rgba(0,0,0,0.5)";X.shadowBlur=15;
+    X.font='bold 36px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle="#fff";X.fillText(story.title,cx,330);X.restore();
+    X.save();X.font='16px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle="rgba(255,255,255,0.5)";X.fillText(story.subtitle,cx,380);X.restore();
+    // 画几颗小星星装饰
+    var starPos=[{x:80,y:150},{x:370,y:100},{x:60,y:400},{x:390,y:450},{x:200,y:500}];
+    starPos.forEach(function(sp){X.save();X.globalAlpha=0.5+0.5*Math.sin(t*2+sp.x);X.font='20px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";X.fillText("\u2B50",sp.x,sp.y);X.restore()});
+    // 底部提示
+    X.save();X.font='14px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";
+    X.fillStyle="rgba(255,255,255,0.3)";X.fillText("\u00A9 \u513F\u7AE5\u7ED8\u672C\u52A8\u753B",cx,750);X.restore()
+  }else if(idx===5){
+    // 结尾
+    X.save();X.shadowColor="rgba(0,0,0,0.5)";X.shadowBlur=15;
+    X.font='bold 32px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle="#fff";X.fillText(story.title,cx,200);X.restore();
+    // 画大星星
+    X.save();X.shadowColor="#ffd70060";X.shadowBlur=40;
+    X.font='80px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillText("\u2605",cx,300);X.restore();
+    X.save();X.font='18px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle="rgba(255,255,255,0.8)";X.fillText(story.text,cx,400);X.restore();
+    // 闪烁的晚安
+    var f=Math.sin(t*3)*0.5+0.5;
+    X.save();X.globalAlpha=f;X.font='22px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";
+    X.fillStyle="rgba(255,255,255,0.6)";X.fillText("\uD83C\uDF19 \u665A\u5B89\uFF0C\u5C0F\u670B\u53CB",cx,500);X.restore()
+  }else{
+    // 场景页
+    var sceneColors=["#ffd700","#fdcb6e","#a29bfe","#fd79a8"];
+    var sc=sceneColors[idx-1]||"#ffd700";
+    var g2=X.createRadialGradient(cx,cy-120,10,cx,cy-120,180);
+    g2.addColorStop(0,sc+"30");g2.addColorStop(1,"transparent");
+    X.fillStyle=g2;X.fillRect(0,0,W,H);
+
+    // 装饰：根据不同场景画不同角色
+    if(idx===1){
+      // 小星星（孤独的）
+      X.save();X.shadowColor="#ffd70060";X.shadowBlur=30;
+      X.font='50px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+      X.fillText("\u2605",cx,cy-150);X.restore();
+      // 云朵
+      X.save();X.globalAlpha=0.3;X.fillStyle="#fff";X.beginPath();X.arc(cx-60,cy-80,30,0,Math.PI*2);X.arc(cx+60,cy-80,30,0,Math.PI*2);X.arc(cx,cy-100,35,0,Math.PI*2);X.fill();X.restore();
+    }else if(idx===2){
+      // 月亮婆婆
+      X.save();X.shadowColor="#fdcb6e60";X.shadowBlur=40;
+      X.font='60px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+      X.fillText("\uD83C\uDF19",cx,cy-150);X.restore();
+      // 小星星在月亮旁边
+      X.save();X.shadowColor="#ffd70040";X.shadowBlur=20;
+      X.font='30px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+      X.fillText("\u2605",cx+80,cy-140);X.restore();
+    }else if(idx===3){
+      // 流星
+      var mx=100+Math.sin(t*0.5)*200;
+      X.save();X.shadowColor="#a29bfe80";X.shadowBlur=30;
+      X.font='50px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+      X.fillText("\uD83D\uDCAB",mx,cy-150);X.restore();
+      // 小星星
+      X.save();X.shadowColor="#ffd70040";X.shadowBlur=20;
+      X.font='30px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";
+      X.fillText("\u2605",mx-70,cy-130);X.restore();
+    }else if(idx===4){
+      // 很多小星星跳舞
+      var dancers=[{x:cx-100,y:cy-170},{x:cx+100,y:cy-170},{x:cx-50,y:cy-120},{x:cx+50,y:cy-120},{x:cx,y:cy-145}];
+      dancers.forEach(function(d,i){X.save();X.shadowColor="#ffd70040";X.shadowBlur=20;X.globalAlpha=0.6+0.4*Math.sin(t*2+i);X.font='30px "Segoe UI Emoji",sans-serif';X.textAlign="center";X.textBaseline="middle";X.fillText("\u2605",d.x,d.y);X.restore()});
+    }
+
+    // 标题
+    X.save();X.shadowColor="rgba(0,0,0,0.5)";X.shadowBlur=10;
+    X.font='bold 24px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle="#fff";X.fillText(story.title,cx,cy-20);X.restore();
+    // 装饰线
+    var lw=60+Math.sin(t*2)*10;
+    X.save();X.strokeStyle=sc+"80";X.lineWidth=2;X.shadowColor=sc+"40";X.shadowBlur=8;
+    X.beginPath();X.moveTo(cx-lw/2,cy+15);X.lineTo(cx+lw/2,cy+15);X.stroke();X.restore();
+    // 故事文字（分段显示）
+    X.save();X.font='16px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle="rgba(255,255,255,0.85)";X.shadowColor="rgba(0,0,0,0.3)";X.shadowBlur=5;
+    var lines=story.text.match(/.{1,12}/g)||[story.text];
+    lines.forEach(function(l,i){X.fillText(l,cx,cy+60+i*28)});X.restore();
+    // 页码点
+    X.save();X.font='13px "Microsoft YaHei","PingFang SC",sans-serif';X.textAlign="center";X.fillStyle="rgba(255,255,255,0.3)";
+    X.fillText(idx+"/"+(STORY.length-1),cx,H-155);X.restore();
+    STORY.slice(1,-1).forEach(function(_,j){
+      X.save();X.beginPath();X.arc(cx+(j-(STORY.length-3)/2)*18+9,H-125,4,0,Math.PI*2);
+      X.fillStyle=j===idx-1?sc:"rgba(255,255,255,0.2)";
+      X.shadowColor=j===idx-1?sc+"60":"transparent";X.shadowBlur=j===idx-1?10:0;X.fill();X.restore()
+    })
+  }
+  // 页码
+  PN.textContent=(idx+1)+" / "+STORY.length;
+}
+
+// ===== 播放控制 =====
+function startPlay(){
+  stopped=false;playing=true;B.textContent="\u23F8";S0.textContent="\u64AD\u653E\u4E2D...";
+  currentIdx=0;drawScene(currentIdx,0);
+  setTimeout(function(){speak(currentIdx,nextPage)},500);
+  if(!animFrame)loop();
+}
+
+function nextPage(){
+  if(stopped)return;
+  currentIdx++;
+  if(currentIdx>=STORY.length){
+    playing=false;B.textContent="\u25B6";S0.textContent="\u2716 \u6545\u4E8B\u7ED3\u675F";
+    return;
+  }
+  drawScene(currentIdx,0);
+  setTimeout(function(){if(!stopped&&playing)speak(currentIdx,nextPage)},300);
+}
+
+function pausePlay(){
+  playing=false;synth.cancel();B.textContent="\u25B6";S0.textContent="\u23F8 \u5DF2\u6682\u505C";
+}
+
+function togglePlay(){
+  if(playing){pausePlay()}
+  else if(currentIdx>=STORY.length-1){currentIdx=0;startPlay()}
+  else{startPlay()}
+}
+
+function replay(){
+  if(playing)synth.cancel();
+  stopped=true;playing=false;
+  setTimeout(function(){
+    stopped=false;currentIdx=0;P.style.width="0%";
+    startPlay();
+  },200);
+}
+
+B.onclick=togglePlay;
+R.onclick=replay;
+
+// ===== 动画循环 =====
+function loop(){
+  var t=performance.now()/1000;
+  X.clearRect(0,0,W,H);
+  drawScene(playing?currentIdx:0,t);
+  // 进度条
+  P.style.width=Math.min((currentIdx+1)/STORY.length*100,100)+"%";
+  animFrame=requestAnimationFrame(loop);
+}
+
+// 初始绘制
+drawScene(0,0);
+S0.textContent="\u2716 \u70B9\u51FB\u25B6 \u64AD\u653E\u6545\u4E8B";
+</script>
+</body>
+</html>

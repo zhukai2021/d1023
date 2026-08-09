@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>科学日报 · 信息面板</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;color:#e0e8f0;font-family:'Inter','Microsoft YaHei','PingFang SC',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center}
+#app{width:450px;min-height:800px;background:#0d1225;border-radius:24px;overflow:hidden;box-shadow:0 0 80px rgba(0,80,200,0.08),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);position:relative;padding:20px 18px 30px}
+@media(max-width:500px){#app{width:100vw;min-height:100vh;border-radius:0}}
+
+/* Animated background particles */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#app>*{position:relative;z-index:1}
+
+/* Header */
+.header{text-align:center;padding:6px 0 14px;border-bottom:1px solid rgba(255,255,255,0.04);margin-bottom:16px}
+.clock{font-size:36px;font-weight:700;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
+.date-row{display:flex;justify-content:center;gap:12px;margin-top:4px;font-size:13px;color:rgba(255,255,255,0.5)}
+.lunar{color:rgba(255,200,100,0.6)}
+
+/* Section title */
+.section{margin-top:18px;display:flex;align-items:center;gap:10px}
+.section .icon{font-size:18px}
+.section h2{font-size:15px;font-weight:600;color:rgba(255,255,255,0.8);letter-spacing:1px;text-transform:uppercase}
+.section .line{flex:1;height:1px;background:linear-gradient(90deg,rgba(96,165,250,0.3),transparent)}
+
+/* Card grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+
+/* Card */
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;transition:0.3s;cursor:default}
+.card:hover{background:rgba(255,255,255,0.06);border-color:rgba(96,165,250,0.2)}
+.card .card-icon{font-size:20px;margin-bottom:4px}
+.card .card-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.7)}
+.card .card-desc{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;line-height:1.4}
+
+/* Highlight card */
+.card.highlight{border-left:2px solid rgba(96,165,250,0.4)}
+.card.highlight.green{border-left-color:rgba(52,211,153,0.4)}
+.card.highlight.amber{border-left-color:rgba(251,191,36,0.4)}
+.card.highlight.purple{border-left-color:rgba(167,139,250,0.4)}
+
+/* History list */
+.history-list{margin-top:8px}
+.history-item{display:flex;gap:10px;padding:8px 10px;border-radius:8px;transition:0.2s}
+.history-item:hover{background:rgba(255,255,255,0.03)}
+.history-year{font-size:13px;font-weight:700;color:#60a5fa;min-width:42px;padding-top:1px}
+.history-text{font-size:12px;color:rgba(255,255,255,0.65);line-height:1.5}
+
+/* Laohuangli */
+.lhl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.lhl-card{background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.04)}
+.lhl-card .lhl-label{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px}
+.lhl-card .lhl-value{font-size:13px;font-weight:600;margin-top:3px;color:rgba(255,255,255,0.8)}
+.lhl-card .lhl-value.yi,.lhl-card .lhl-value.col-green{color:#34d399}
+.lhl-card .lhl-value.ji,.lhl-card .lhl-value.col-rose{color:#fb7185}
+
+/* Links section */
+.links{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.link-btn{flex:1;min-width:90px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);text-decoration:none;transition:0.3s;cursor:pointer}
+.link-btn:hover{background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.2)}
+.link-btn .lb-icon{font-size:22px}
+.link-btn .lb-label{font-size:10px;color:rgba(255,255,255,0.5);text-align:center;line-height:1.2}
+.link-btn:hover .lb-label{color:rgba(255,255,255,0.8)}
+
+/* Fun fact */
+.fun-fact{margin-top:12px;padding:10px 12px;background:rgba(96,165,250,0.04);border:1px solid rgba(96,165,250,0.08);border-radius:10px;display:flex;align-items:flex-start;gap:8px}
+.fun-fact .ff-icon{font-size:16px;padding-top:1px}
+.fun-fact .ff-text{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5}
+.fun-fact .ff-text strong{color:rgba(255,255,255,0.8)}
+
+/* Footer */
+.footer{text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);font-size:10px;color:rgba(255,255,255,0.15)}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div id="app">
+
+<!-- Header: Clock + Date -->
+<div class="header">
+  <div class="clock" id="clock">--:--:--</div>
+  <div class="date-row">
+    <span id="dateDisplay">2026年8月8日 星期六</span>
+    <span class="lunar" id="lunarDisplay">农历六月廿六 · 丙午年</span>
+  </div>
+</div>
+
+<!-- 1. 今日科技新闻 -->
+<div class="section"><span class="icon">📡</span><h2>今日科技</h2><div class="line"></div></div>
+<div class="grid">
+  <div class="card highlight">
+    <div class="card-icon">🧠</div>
+    <div class="card-title">字节跳动坚持大模型自研</div>
+    <div class="card-desc">CEO梁汝波：接受短期落后，优化长期</div>
+  </div>
+  <div class="card highlight green">
+    <div class="card-icon">🤖</div>
+    <div class="card-title">具身智能一天投5亿</div>
+    <div class="card-desc">具身大模型打响头部卡位战</div>
+  </div>
+  <div class="card highlight amber">
+    <div class="card-icon">🚀</div>
+    <div class="card-title">商业航天融资翻3.7倍</div>
+    <div class="card-desc">近七成资金涌向头部企业</div>
+  </div>
+  <div class="card highlight purple">
+    <div class="card-icon">🦾</div>
+    <div class="card-title">宇树市值600亿</div>
+    <div class="card-desc">DeepSeek现身战略配售</div>
+  </div>
+</div>
+
+<!-- 2. 历史上的今天 -->
+<div class="section"><span class="icon">📜</span><h2>历史上的今天 · 8月8日</h2><div class="line"></div></div>
+<div class="history-list">
+  <div class="history-item"><span class="history-year">2008</span><span class="history-text">第29届夏季奥运会在北京开幕，百年奥运梦圆中国</span></div>
+  <div class="history-item"><span class="history-year">1974</span><span class="history-text">美国总统尼克松因"水门事件"宣布辞职，成为美国首位辞职总统</span></div>
+  <div class="history-item"><span class="history-year">1967</span><span class="history-text">东南亚国家联盟（东盟）在曼谷成立</span></div>
+  <div class="history-item"><span class="history-year">1945</span><span class="history-text">苏联对日宣战，东北抗联配合苏军对日作战</span></div>
+  <div class="history-item"><span class="history-year">2010</span><span class="history-text">甘肃舟曲特大山洪泥石流，造成重大人员伤亡</span></div>
+  <div class="history-item"><span class="history-year">1892</span><span class="history-text">中国科学家、中国近代气象学奠基人竺可桢诞生</span></div>
+</div>
+
+<!-- 3. 老黄历 -->
+<div class="section"><span class="icon">🏮</span><h2>今日黄历</h2><div class="line"></div></div>
+<div class="lhl-grid">
+  <div class="lhl-card">
+    <div class="lhl-label">农历</div>
+    <div class="lhl-value">六月廿六</div>
+  </div>
+  <div class="lhl-card">
+    <div class="lhl-label">干支</div>
+    <div class="lhl-value">丙午·乙未·癸丑</div>
+  </div>
+  <div class="lhl-card">
+    <div class="lhl-label">宜</div>
+    <div class="lhl-value yi">祭祀 · 求医 · 捕捉 · 栽种</div>
+  </div>
+  <div class="lhl-card">
+    <div class="lhl-label">忌</div>
+    <div class="lhl-value ji">诸事不宜</div>
+  </div>
+  <div class="lhl-card">
+    <div class="lhl-label">冲煞</div>
+    <div class="lhl-value">冲羊 · 煞东</div>
+  </div>
+  <div class="lhl-card">
+    <div class="lhl-label">五行</div>
+    <div class="lhl-value">桑柘木</div>
+  </div>
+</div>
+
+<!-- 4. 快捷入口 -->
+<div class="section"><span class="icon">🔗</span><h2>项目导航</h2><div class="line"></div></div>
+<div class="links">
+  <a href="hyperframes_0806.html" class="link-btn">
+    <span class="lb-icon">📡</span>
+    <span class="lb-label">科技新闻<br>配音动画</span>
+  </a>
+  <a href="laohuangli.html" class="link-btn">
+    <span class="lb-icon">🏮</span>
+    <span class="lb-label">老黄历<br>传统宜忌</span>
+  </a>
+  <a href="picture_book.html" class="link-btn">
+    <span class="lb-icon">📖</span>
+    <span class="lb-label">儿童绘本<br>星星故事</span>
+  </a>
+</div>
+
+<!-- 5. Fun Fact -->
+<div class="fun-fact">
+  <span class="ff-icon">💡</span>
+  <div class="ff-text"><strong>科学小知识：</strong> 火星上的一天（太阳日）约为24小时39分钟，仅比地球长39分钟。但火星的一年相当于地球的687天，几乎是地球的两倍。</div>
+</div>
+
+<!-- Footer -->
+<div class="footer">科学日报 · 每日更新 · ☀️</div>
+
+</div>
+
+<script>
+// Canvas background particles
+var C=document.getElementById("bg-canvas"),X=C.getContext("2d");
+function resize(){C.width=window.innerWidth;C.height=window.innerHeight}
+resize();window.addEventListener("resize",resize);
+
+var P=[];
+for(var i=0;i<60;i++){
+  P.push({
+    x:Math.random()*C.width,y:Math.random()*C.height,
+    s:0.5+Math.random()*1.5,spd:0.05+Math.random()*0.15,
+    drift:(Math.random()-0.5)*0.1,o:0.1+Math.random()*0.4,
+    phase:Math.random()*Math.PI*2
+  });
+}
+
+function drawBg(){
+  X.clearRect(0,0,C.width,C.height);
+  var t=performance.now()/1000;
+  P.forEach(function(p){
+    p.y-=p.spd;p.x+=Math.sin(t*0.3+p.phase)*p.drift;
+    if(p.y<-10){p.y=C.height+10;p.x=Math.random()*C.width}
+    var a=p.o*0.5+Math.sin(t*1.5+p.phase)*0.2;
+    X.fillStyle="rgba(96,165,250,"+a+")";
+    X.beginPath();X.arc(p.x,p.y,p.s,0,Math.PI*2);X.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// Real-time clock
+function updateClock(){
+  var d=new Date();
+  var h=String(d.getUTCHours()+8).padStart(2,"0");
+  var m=String(d.getMinutes()).padStart(2,"0");
+  var s=String(d.getSeconds()).padStart(2,"0");
+  document.getElementById("clock").textContent=h+":"+m+":"+s;
+}
+setInterval(updateClock,1000);updateClock();
+</script>
+</body>
+</html>
