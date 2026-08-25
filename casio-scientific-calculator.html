@@ -24,7 +24,6 @@
             box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08);
         }
         
-        /* Brand */
         .brand {
             display: flex;
             justify-content: space-between;
@@ -36,7 +35,6 @@
         .brand-model { font-size: 8px; color: #888; letter-spacing: 1px; }
         .brand-badge { background: linear-gradient(135deg, #00d4ff, #0090ff); color: #fff; font-size: 7px; padding: 2px 6px; border-radius: 3px; }
         
-        /* Solar Panel */
         .solar-panel {
             height: 24px;
             background: linear-gradient(180deg, #1a1a3a, #0d0d20);
@@ -49,7 +47,6 @@
         .solar-cell { flex: 1; border-right: 1px solid rgba(255,255,255,0.03); background: linear-gradient(180deg, #1e1e4a, #12123a); }
         .solar-cell:last-child { border-right: none; }
         
-        /* Display */
         .display {
             background: linear-gradient(180deg, #0a1628, #0d1f35);
             border-radius: 12px;
@@ -83,14 +80,12 @@
         }
         .display-result.error { color: #ff6b6b; font-size: 18px; }
         
-        /* Button Grid - 5列布局 */
         .btn-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 6px;
         }
         
-        /* 按钮基础样式 */
         .btn {
             border: none;
             border-radius: 6px;
@@ -107,73 +102,56 @@
         }
         .btn:active { transform: scale(0.93); }
         
-        /* 功能键 - 深色 */
         .btn-func {
             background: linear-gradient(180deg, #3a3a5a, #2a2a4a);
             color: #a0a0c0;
             font-size: 11px;
         }
-        
-        /* 数字键 - 浅色 */
         .btn-num {
             background: linear-gradient(180deg, #e8e8f0, #d0d0e0);
             color: #1a1a2e;
             font-size: 17px;
             font-weight: 600;
         }
-        
-        /* 运算符 - 蓝色 */
         .btn-op {
             background: linear-gradient(180deg, #4a90d9, #357abd);
             color: #fff;
             font-size: 17px;
             font-weight: 600;
         }
-        
-        /* 等号 - 亮蓝 */
         .btn-eq {
             background: linear-gradient(180deg, #00d4ff, #0090ff);
             color: #fff;
             font-size: 20px;
             font-weight: 700;
         }
-        
-        /* 清空 - 红色 */
         .btn-clear {
             background: linear-gradient(180deg, #ff6b6b, #e04545);
             color: #fff;
             font-size: 12px;
             font-weight: 700;
         }
-        
-        /* Shift键 - 黄色 */
         .btn-shift {
             background: linear-gradient(180deg, #e8c547, #d4a830);
             color: #1a1a2e;
             font-weight: 700;
             font-size: 10px;
         }
-        
-        /* Alpha键 - 红色 */
         .btn-alpha {
             background: linear-gradient(180deg, #ff6b6b, #e04545);
             color: #fff;
             font-weight: 700;
             font-size: 10px;
         }
-        
-        /* 导航键 */
         .btn-nav {
             background: linear-gradient(180deg, #4a4a6a, #3a3a5a);
             color: #fff;
             font-size: 10px;
         }
         
-        /* 子标签 */
         .btn-inner { display: flex; flex-direction: column; align-items: center; gap: 1px; }
         .sub-label { font-size: 7px; color: #e8c547; line-height: 1; }
         
-        /* 响应式 */
         @media (max-height: 700px) { .calculator { transform: scale(0.9); } }
         @media (max-height: 600px) { .calculator { transform: scale(0.8); } }
         @media (max-width: 360px) {
@@ -183,7 +161,6 @@
             .display-result { font-size: 24px; }
         }
         
-        /* 结果发光动画 */
         @keyframes glow { 0%,100% { text-shadow: 0 0 15px rgba(0,200,255,0.4); } 50% { text-shadow: 0 0 25px rgba(0,200,255,0.7); } }
         .display-result { animation: glow 3s ease-in-out infinite; }
     </style>
@@ -215,100 +192,117 @@
         <div class="display-result" id="result">0</div>
     </div>
     
-    <div class="btn-grid">
-        <!-- Row 1: Shift, Alpha, Nav -->
-        <button class="btn btn-shift" onclick="toggleShift()">SHIFT</button>
+    <div class="btn-grid" id="btnGrid">
+        <!-- Row 1 -->
+        <button class="btn btn-shift" data-action="shift">SHIFT</button>
         <button class="btn btn-alpha">ALPHA</button>
         <button class="btn btn-nav">▲</button>
         <button class="btn btn-nav">◄</button>
         <button class="btn btn-nav">►</button>
         
-        <!-- Row 2: 科学函数 -->
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">a/b</span><span>✿</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">∛</span><span>√□</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">x³</span><span>x²</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">ˣ√</span><span>xʸ</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">10ˣ</span><span>log</span></div></button>
+        <!-- Row 2 -->
+        <button class="btn btn-func" data-action="frac"><div class="btn-inner"><span class="sub-label">a/b</span><span>✿</span></div></button>
+        <button class="btn btn-func" data-action="sqrt"><div class="btn-inner"><span class="sub-label">∛</span><span>√□</span></div></button>
+        <button class="btn btn-func" data-action="square"><div class="btn-inner"><span class="sub-label">x³</span><span>x²</span></div></button>
+        <button class="btn btn-func" data-action="power"><div class="btn-inner"><span class="sub-label">ˣ√</span><span>xʸ</span></div></button>
+        <button class="btn btn-func" data-action="log"><div class="btn-inner"><span class="sub-label">10ˣ</span><span>log</span></div></button>
         
-        <!-- Row 3: 更多函数 -->
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">eˣ</span><span>ln</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">sin⁻¹</span><span>sin</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">cos⁻¹</span><span>cos</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">tan⁻¹</span><span>tan</span></div></button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">x!</span><span>1/x</span></div></button>
+        <!-- Row 3 -->
+        <button class="btn btn-func" data-action="ln"><div class="btn-inner"><span class="sub-label">eˣ</span><span>ln</span></div></button>
+        <button class="btn btn-func" data-action="sin"><div class="btn-inner"><span class="sub-label">sin⁻¹</span><span>sin</span></div></button>
+        <button class="btn btn-func" data-action="cos"><div class="btn-inner"><span class="sub-label">cos⁻¹</span><span>cos</span></div></button>
+        <button class="btn btn-func" data-action="tan"><div class="btn-inner"><span class="sub-label">tan⁻¹</span><span>tan</span></div></button>
+        <button class="btn btn-func" data-action="inv"><div class="btn-inner"><span class="sub-label">x!</span><span>1/x</span></div></button>
         
-        <!-- Row 4: 辅助功能 -->
-        <button class="btn btn-func">|x|</button>
-        <button class="btn btn-func">( )</button>
-        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">ENG</span><span>a×10ᵇ</span></div></button>
-        <button class="btn btn-func">%</button>
-        <button class="btn btn-func">Ans</button>
+        <!-- Row 4 -->
+        <button class="btn btn-func" data-action="abs">|x|</button>
+        <button class="btn btn-func" data-action="paren">( )</button>
+        <button class="btn btn-func" data-action="sci"><div class="btn-inner"><span class="sub-label">ENG</span><span>a×10ᵇ</span></div></button>
+        <button class="btn btn-func" data-action="percent">%</button>
+        <button class="btn btn-func" data-action="ans">Ans</button>
         
-        <!-- Row 5: 数字 7-8-9 ÷ -->
-        <button class="btn btn-clear">AC</button>
-        <button class="btn btn-num" onclick="press('7')">7</button>
-        <button class="btn btn-num" onclick="press('8')">8</button>
-        <button class="btn btn-num" onclick="press('9')">9</button>
-        <button class="btn btn-op" onclick="press('÷')">÷</button>
+        <!-- Row 5 -->
+        <button class="btn btn-clear" data-action="clear">AC</button>
+        <button class="btn btn-num" data-action="num" data-val="7">7</button>
+        <button class="btn btn-num" data-action="num" data-val="8">8</button>
+        <button class="btn btn-num" data-action="num" data-val="9">9</button>
+        <button class="btn btn-op" data-action="op" data-val="÷">÷</button>
         
-        <!-- Row 6: 删除 4-5-6 × -->
-        <button class="btn btn-func">⌫</button>
-        <button class="btn btn-num" onclick="press('4')">4</button>
-        <button class="btn btn-num" onclick="press('5')">5</button>
-        <button class="btn btn-num" onclick="press('6')">6</button>
-        <button class="btn btn-op" onclick="press('×')">×</button>
+        <!-- Row 6 -->
+        <button class="btn btn-func" data-action="back">⌫</button>
+        <button class="btn btn-num" data-action="num" data-val="4">4</button>
+        <button class="btn btn-num" data-action="num" data-val="5">5</button>
+        <button class="btn btn-num" data-action="num" data-val="6">6</button>
+        <button class="btn btn-op" data-action="op" data-val="×">×</button>
         
-        <!-- Row 7: 负号 1-2-3 - -->
-        <button class="btn btn-func">(-)</button>
-        <button class="btn btn-num" onclick="press('1')">1</button>
-        <button class="btn btn-num" onclick="press('2')">2</button>
-        <button class="btn btn-num" onclick="press('3')">3</button>
-        <button class="btn btn-op" onclick="press('−')">−</button>
+        <!-- Row 7 -->
+        <button class="btn btn-func" data-action="neg">(-)</button>
+        <button class="btn btn-num" data-action="num" data-val="1">1</button>
+        <button class="btn btn-num" data-action="num" data-val="2">2</button>
+        <button class="btn btn-num" data-action="num" data-val="3">3</button>
+        <button class="btn btn-op" data-action="op" data-val="−">−</button>
         
-        <!-- Row 8: π 0 . + = -->
-        <button class="btn btn-func">π</button>
-        <button class="btn btn-num" onclick="press('0')">0</button>
-        <button class="btn btn-num" onclick="press('.')">.</button>
-        <button class="btn btn-op" onclick="press('+')">+</button>
-        <button class="btn btn-eq" onclick="calculate()">=</button>
+        <!-- Row 8 -->
+        <button class="btn btn-func" data-action="pi">π</button>
+        <button class="btn btn-num" data-action="num" data-val="0">0</button>
+        <button class="btn btn-num" data-action="dot">.</button>
+        <button class="btn btn-op" data-action="op" data-val="+">+</button>
+        <button class="btn btn-eq" data-action="equal">=</button>
     </div>
 </div>
 
 <script>
 (function() {
-    let expr = '', display = '', result = '0', lastAns = 0, shift = false;
+    'use strict';
+    
+    let expr = '';
+    let display = '';
+    let result = '0';
+    let lastAns = 0;
+    let shiftActive = false;
     
     const exprEl = document.getElementById('expression');
     const resEl = document.getElementById('result');
     const shiftEl = document.getElementById('shiftTag');
+    const btnGrid = document.getElementById('btnGrid');
     
-    function toRad(d) { return d * Math.PI / 180; }
-    function toDeg(r) { return r * 180 / Math.PI; }
+    // 工具函数
+    function toRad(deg) { return deg * Math.PI / 180; }
     
-    function fmt(n) {
+    function formatNum(n) {
         if (typeof n !== 'number' || !isFinite(n)) return isNaN(n) ? 'Math ERROR' : (n > 0 ? '∞' : '-∞');
         if (Math.abs(n) > 1e15 || (Math.abs(n) < 1e-10 && n !== 0)) return n.toExponential(6);
         return parseFloat(n.toPrecision(10)).toString();
     }
     
-    function evalExpr(e) {
-        let ex = e
-            .replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-')
-            .replace(/π/g, String(Math.PI))
-            .replace(/sin\(([^)]+)\)/g, (_, a) => Math.sin(toRad(Number(a))))
-            .replace(/cos\(([^)]+)\)/g, (_, a) => Math.cos(toRad(Number(a))))
-            .replace(/tan\(([^)]+)\)/g, (_, a) => Math.tan(toRad(Number(a))))
-            .replace(/log\(([^)]+)\)/g, (_, a) => Math.log10(Number(a)))
-            .replace(/ln\(([^)]+)\)/g, (_, a) => Math.log(Number(a)))
+    // 表达式求值
+    function evaluate(expression) {
+        if (!expression) return 0;
+        let e = expression
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/−/g, '-')
+            .replace(/π/g, '(' + Math.PI + ')')
+            .replace(/sin\(([^)]+)\)/g, function(m, a) { return Math.sin(toRad(parseFloat(a))); })
+            .replace(/cos\(([^)]+)\)/g, function(m, a) { return Math.cos(toRad(parseFloat(a))); })
+            .replace(/tan\(([^)]+)\)/g, function(m, a) { return Math.tan(toRad(parseFloat(a))); })
+            .replace(/log\(([^)]+)\)/g, function(m, a) { return Math.log10(parseFloat(a)); })
+            .replace(/ln\(([^)]+)\)/g, function(m, a) { return Math.log(parseFloat(a)); })
             .replace(/√\(/g, 'Math.sqrt(')
             .replace(/\^/g, '**');
+        
         // 隐式乘法
-        ex = ex.replace(/(\d)([π])/g, '$1*$2').replace(/(\d)\(/g, '$1*(');
-        try { return new Function('return (' + ex + ')')(); }
-        catch(e) { return NaN; }
+        e = e.replace(/(\d)(\()/g, '$1*$2');
+        e = e.replace(/\)(\d)/g, ')*$1');
+        
+        try {
+            return new Function('return (' + e + ')')();
+        } catch(e) {
+            return NaN;
+        }
     }
     
-    function update() {
+    function updateDisplay() {
         exprEl.textContent = display || ' ';
         resEl.textContent = result;
         resEl.classList.remove('error');
@@ -316,44 +310,268 @@
         resEl.scrollLeft = resEl.scrollWidth;
     }
     
-    window.press = function(val) {
-        display += val;
-        expr += val;
+    function handleButton(action, val) {
+        // Shift 切换
+        if (action === 'shift') {
+            shiftActive = !shiftActive;
+            shiftEl.classList.toggle('off', !shiftActive);
+            return;
+        }
+        
+        // Shift + 功能键
+        if (shiftActive) {
+            shiftActive = false;
+            shiftEl.classList.add('off');
+            
+            const shiftMap = {
+                'sin': 'asin',
+                'cos': 'acos',
+                'tan': 'atan',
+                'log': 'pow10',
+                'ln': 'exp',
+                'sqrt': 'cbrt',
+                'square': 'cube',
+                'pi': 'e_const'
+            };
+            
+            if (shiftMap[action]) {
+                action = shiftMap[action];
+            }
+        }
+        
+        switch(action) {
+            case 'num':
+                display += val;
+                expr += val;
+                break;
+            
+            case 'dot':
+                display += '.';
+                expr += '.';
+                break;
+            
+            case 'op':
+                display += ' ' + val + ' ';
+                expr += val;
+                break;
+            
+            case 'clear':
+                display = '';
+                expr = '';
+                result = '0';
+                lastAns = 0;
+                updateDisplay();
+                return;
+            
+            case 'back':
+                display = display.slice(0, -1);
+                expr = expr.slice(0, -1);
+                // 重新计算预览
+                const prev = evaluate(expr);
+                if (!isNaN(prev) && isFinite(prev)) result = formatNum(prev);
+                updateDisplay();
+                return;
+            
+            case 'equal':
+                const ans = evaluate(expr);
+                result = formatNum(ans);
+                if (result === 'Math ERROR') resEl.classList.add('error');
+                else lastAns = ans;
+                expr = result === 'Math ERROR' ? '' : result;
+                display = '';
+                updateDisplay();
+                return;
+            
+            case 'sqrt':
+                display += '√(';
+                expr += '√(';
+                break;
+            
+            case 'cbrt':
+                display += '∛(';
+                expr += '∛(';
+                break;
+            
+            case 'square':
+                display += '²';
+                expr += '^2';
+                break;
+            
+            case 'cube':
+                display += '³';
+                expr += '^3';
+                break;
+            
+            case 'power':
+                display += '^(';
+                expr += '^(';
+                break;
+            
+            case 'sin':
+                display += 'sin(';
+                expr += 'sin(';
+                break;
+            
+            case 'asin':
+                display += 'sin⁻¹(';
+                expr += 'asin(';
+                break;
+            
+            case 'cos':
+                display += 'cos(';
+                expr += 'cos(';
+                break;
+            
+            case 'acos':
+                display += 'cos⁻¹(';
+                expr += 'acos(';
+                break;
+            
+            case 'tan':
+                display += 'tan(';
+                expr += 'tan(';
+                break;
+            
+            case 'atan':
+                display += 'tan⁻¹(';
+                expr += 'atan(';
+                break;
+            
+            case 'log':
+                display += 'log(';
+                expr += 'log(';
+                break;
+            
+            case 'pow10':
+                display += '10^(';
+                expr += '10^(';
+                break;
+            
+            case 'ln':
+                display += 'ln(';
+                expr += 'ln(';
+                break;
+            
+            case 'exp':
+                display += 'e^(';
+                expr += 'Math.exp(';
+                break;
+            
+            case 'pi':
+                display += 'π';
+                expr += 'π';
+                break;
+            
+            case 'e_const':
+                display += 'e';
+                expr += 'e';
+                break;
+            
+            case 'abs':
+                display += '|';
+                expr += '|';
+                break;
+            
+            case 'paren':
+                const openCount = (display + expr).split('(').length - 1;
+                const closeCount = (display + expr).split(')').length - 1;
+                if (openCount > closeCount) {
+                    display += ')';
+                    expr += ')';
+                } else {
+                    display += '(';
+                    expr += '(';
+                }
+                break;
+            
+            case 'inv':
+                if (display) {
+                    display = '(1÷(' + display + '))';
+                    expr = '(1/(' + expr + '))';
+                }
+                break;
+            
+            case 'percent':
+                const num = parseFloat(display) || 0;
+                display = formatNum(num / 100);
+                expr = display;
+                break;
+            
+            case 'ans':
+                display += 'Ans';
+                expr += 'ans';
+                break;
+            
+            case 'sci':
+                if (result && result !== 'Math ERROR') {
+                    const n = parseFloat(result);
+                    display = n.toExponential(6);
+                    expr = display;
+                }
+                break;
+            
+            default:
+                return;
+        }
+        
         // 实时预览
-        const preview = evalExpr(expr);
-        if (!isNaN(preview) && isFinite(preview)) result = fmt(preview);
-        update();
-    };
+        const preview = evaluate(expr);
+        if (!isNaN(preview) && isFinite(preview)) {
+            result = formatNum(preview);
+        }
+        
+        updateDisplay();
+    }
     
-    window.calculate = function() {
-        const r = evalExpr(expr);
-        result = fmt(r);
-        if (result === 'Math ERROR') resEl.classList.add('error');
-        else lastAns = r;
-        expr = result === 'Math ERROR' ? '' : result;
-        display = '';
-        update();
-    };
-    
-    window.toggleShift = function() {
-        shift = !shift;
-        shiftEl.className = 'mode-tag' + (shift ? '' : ' off');
-    };
-    
-    // 键盘支持
-    document.addEventListener('keydown', e => {
-        if (/^[0-9]$/.test(e.key)) press(e.key);
-        else if (e.key === '+') press('+');
-        else if (e.key === '-') press('−');
-        else if (e.key === '*') press('×');
-        else if (e.key === '/') { e.preventDefault(); press('÷'); }
-        else if (e.key === '.') press('.');
-        else if (e.key === 'Enter' || e.key === '=') calculate();
-        else if (e.key === 'Backspace') { display = display.slice(0,-1); expr = expr.slice(0,-1); update(); }
-        else if (e.key === 'Escape') { display = expr = ''; result = '0'; update(); }
+    // 事件委托绑定
+    btnGrid.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn');
+        if (!btn) return;
+        
+        const action = btn.dataset.action;
+        const val = btn.dataset.val;
+        
+        if (action) {
+            handleButton(action, val || '');
+        }
     });
     
-    update();
+    // 键盘支持
+    document.addEventListener('keydown', function(e) {
+        const key = e.key;
+        
+        if (/^[0-9]$/.test(key)) {
+            handleButton('num', key);
+        } else if (key === '+') {
+            handleButton('op', '+');
+        } else if (key === '-') {
+            handleButton('op', '−');
+        } else if (key === '*') {
+            handleButton('op', '×');
+        } else if (key === '/') {
+            e.preventDefault();
+            handleButton('op', '÷');
+        } else if (key === '.') {
+            handleButton('dot');
+        } else if (key === 'Enter' || key === '=') {
+            handleButton('equal');
+        } else if (key === 'Backspace') {
+            handleButton('back');
+        } else if (key === 'Escape') {
+            handleButton('clear');
+        } else if (key === '(') {
+            handleButton('paren');
+        } else if (key === ')') {
+            handleButton('paren');
+        } else if (key === '^') {
+            handleButton('power');
+        } else if (key === 'p' || key === 'P') {
+            handleButton('pi');
+        }
+    });
+    
+    // 初始化显示
+    updateDisplay();
 })();
 </script>
 </body>
