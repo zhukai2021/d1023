@@ -212,7 +212,7 @@
         <button class="btn btn-func" data-action="sin"><div class="btn-inner"><span class="sub-label">sin⁻¹</span><span>sin</span></div></button>
         <button class="btn btn-func" data-action="cos"><div class="btn-inner"><span class="sub-label">cos⁻¹</span><span>cos</span></div></button>
         <button class="btn btn-func" data-action="tan"><div class="btn-inner"><span class="sub-label">tan⁻¹</span><span>tan</span></div></button>
-        <button class="btn btn-func" data-action="inv"><div class="btn-inner"><span class="sub-label">x!</span><span>1/x</span></div></button>
+        <button class="btn btn-func" data-action="inv"><div class="btn-inner"><span class="sub-label">x!</</span><span>1/x</span></div></button>
         
         <!-- Row 4 -->
         <button class="btn btn-func" data-action="abs">|x|</button>
@@ -266,7 +266,6 @@
     const shiftEl = document.getElementById('shiftTag');
     const btnGrid = document.getElementById('btnGrid');
     
-    // 工具函数
     function toRad(deg) { return deg * Math.PI / 180; }
     
     function formatNum(n) {
@@ -275,7 +274,6 @@
         return parseFloat(n.toPrecision(10)).toString();
     }
     
-    // 表达式求值
     function evaluate(expression) {
         if (!expression) return 0;
         let e = expression
@@ -291,7 +289,6 @@
             .replace(/√\(/g, 'Math.sqrt(')
             .replace(/\^/g, '**');
         
-        // 隐式乘法
         e = e.replace(/(\d)(\()/g, '$1*$2');
         e = e.replace(/\)(\d)/g, ')*$1');
         
@@ -311,14 +308,12 @@
     }
     
     function handleButton(action, val) {
-        // Shift 切换
         if (action === 'shift') {
             shiftActive = !shiftActive;
             shiftEl.classList.toggle('off', !shiftActive);
             return;
         }
         
-        // Shift + 功能键
         if (shiftActive) {
             shiftActive = false;
             shiftEl.classList.add('off');
@@ -334,9 +329,7 @@
                 'pi': 'e_const'
             };
             
-            if (shiftMap[action]) {
-                action = shiftMap[action];
-            }
+            if (shiftMap[action]) action = shiftMap[action];
         }
         
         switch(action) {
@@ -366,9 +359,6 @@
             case 'back':
                 display = display.slice(0, -1);
                 expr = expr.slice(0, -1);
-                // 重新计算预览
-                const prev = evaluate(expr);
-                if (!isNaN(prev) && isFinite(prev)) result = formatNum(prev);
                 updateDisplay();
                 return;
             
@@ -499,7 +489,7 @@
             
             case 'ans':
                 display += 'Ans';
-                expr += 'ans';
+                expr += lastAns.toString();
                 break;
             
             case 'sci':
@@ -514,16 +504,9 @@
                 return;
         }
         
-        // 实时预览
-        const preview = evaluate(expr);
-        if (!isNaN(preview) && isFinite(preview)) {
-            result = formatNum(preview);
-        }
-        
         updateDisplay();
     }
     
-    // 事件委托绑定
     btnGrid.addEventListener('click', function(e) {
         const btn = e.target.closest('.btn');
         if (!btn) return;
@@ -536,7 +519,6 @@
         }
     });
     
-    // 键盘支持
     document.addEventListener('keydown', function(e) {
         const key = e.key;
         
@@ -570,7 +552,6 @@
         }
     });
     
-    // 初始化显示
     updateDisplay();
 })();
 </script>
