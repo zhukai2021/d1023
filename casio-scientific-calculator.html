@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>CASIO fx-991CN X · 科学计算器</title>
     <style>
-        /* ── Reset & Base ── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             min-height: 100vh;
             display: flex;
@@ -15,813 +14,346 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
             padding: 16px;
-            overflow: hidden;
         }
-
-        /* ── Calculator Body ── */
+        
         .calculator {
             width: 340px;
             background: linear-gradient(145deg, #2a2a3a 0%, #1e1e2e 100%);
             border-radius: 24px;
             padding: 20px 16px 24px;
-            box-shadow:
-                0 30px 80px rgba(0,0,0,0.7),
-                0 0 0 1px rgba(255,255,255,0.08),
-                inset 0 1px 0 rgba(255,255,255,0.1);
-            position: relative;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08);
         }
-
-        /* ── Brand Header ── */
+        
+        /* Brand */
         .brand {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 14px;
+            align-items: center;
+            margin-bottom: 12px;
             padding: 0 4px;
         }
-        .brand-left {
-            display: flex;
-            flex-direction: column;
-        }
-        .brand-name {
-            font-size: 22px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 3px;
-            text-shadow: 0 0 20px rgba(100,180,255,0.5);
-        }
-        .brand-model {
-            font-size: 9px;
-            color: #888;
-            letter-spacing: 1.5px;
-            margin-top: 2px;
-        }
-        .brand-badge {
-            background: linear-gradient(135deg, #00d4ff, #0090ff);
-            color: #fff;
-            font-size: 8px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 4px;
-            letter-spacing: 1px;
-        }
-
-        /* ── Solar Panel ── */
+        .brand-name { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+        .brand-model { font-size: 8px; color: #888; letter-spacing: 1px; }
+        .brand-badge { background: linear-gradient(135deg, #00d4ff, #0090ff); color: #fff; font-size: 7px; padding: 2px 6px; border-radius: 3px; }
+        
+        /* Solar Panel */
         .solar-panel {
-            height: 28px;
-            background: linear-gradient(180deg, #1a1a3a 0%, #0d0d20 100%);
+            height: 24px;
+            background: linear-gradient(180deg, #1a1a3a, #0d0d20);
             border-radius: 4px;
             margin-bottom: 12px;
             display: flex;
             overflow: hidden;
             border: 1px solid rgba(255,255,255,0.05);
         }
-        .solar-cell {
-            flex: 1;
-            border-right: 1px solid rgba(255,255,255,0.03);
-            background: linear-gradient(180deg, #1e1e4a 0%, #12123a 100%);
-        }
+        .solar-cell { flex: 1; border-right: 1px solid rgba(255,255,255,0.03); background: linear-gradient(180deg, #1e1e4a, #12123a); }
         .solar-cell:last-child { border-right: none; }
-
-        /* ── Display ── */
-        .display-container {
-            background: linear-gradient(180deg, #0a1628 0%, #0d1f35 100%);
+        
+        /* Display */
+        .display {
+            background: linear-gradient(180deg, #0a1628, #0d1f35);
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 14px;
             border: 1px solid rgba(255,255,255,0.06);
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
         }
-        .display-mode {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 6px;
-        }
-        .mode-tag {
-            font-size: 9px;
-            color: #00d4ff;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .mode-tag.inactive { color: #3a5a7a; }
-        .display-expression {
-            min-height: 24px;
-            font-size: 14px;
+        .display-mode { display: flex; gap: 8px; margin-bottom: 4px; }
+        .mode-tag { font-size: 9px; color: #00d4ff; font-weight: 600; }
+        .mode-tag.off { color: #3a5a7a; }
+        .display-expr {
+            min-height: 22px;
+            font-size: 13px;
             color: #5a8aaa;
             text-align: right;
             font-family: 'Courier New', monospace;
             overflow-x: auto;
             white-space: nowrap;
-            scrollbar-width: none;
         }
-        .display-expression::-webkit-scrollbar { display: none; }
         .display-result {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 300;
             color: #fff;
             text-align: right;
             font-family: 'Courier New', monospace;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            text-shadow: 0 0 20px rgba(0,200,255,0.4);
+            min-height: 38px;
+            text-shadow: 0 0 15px rgba(0,200,255,0.4);
             overflow-x: auto;
             white-space: nowrap;
-            scrollbar-width: none;
         }
-        .display-result::-webkit-scrollbar { display: none; }
-        .display-result.error { color: #ff6b6b; font-size: 20px; }
-
-        /* ── Button Grid ── */
+        .display-result.error { color: #ff6b6b; font-size: 18px; }
+        
+        /* Button Grid - 5列布局 */
         .btn-grid {
             display: grid;
+            grid-template-columns: repeat(5, 1fr);
             gap: 6px;
         }
-        /* Top function row */
-        .row-func { grid-template-columns: repeat(5, 1fr); }
-        /* Number + basic ops */
-        .row-main { grid-template-columns: repeat(5, 1fr); }
-        /* Bottom special */
-        .row-special { grid-template-columns: repeat(5, 1fr); }
-
-        /* ── Button Base ── */
+        
+        /* 按钮基础样式 */
         .btn {
             border: none;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.1s ease;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.1s;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 42px;
+            min-height: 40px;
             font-family: inherit;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
-        .btn:active { transform: scale(0.94); }
-        .btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 6px;
-            opacity: 0;
-            transition: opacity 0.1s;
+        .btn:active { transform: scale(0.93); }
+        
+        /* 功能键 - 深色 */
+        .btn-func {
+            background: linear-gradient(180deg, #3a3a5a, #2a2a4a);
+            color: #a0a0c0;
+            font-size: 11px;
         }
-        .btn:active::after { opacity: 1; }
-
-        /* ── Button Types ── */
+        
+        /* 数字键 - 浅色 */
+        .btn-num {
+            background: linear-gradient(180deg, #e8e8f0, #d0d0e0);
+            color: #1a1a2e;
+            font-size: 17px;
+            font-weight: 600;
+        }
+        
+        /* 运算符 - 蓝色 */
+        .btn-op {
+            background: linear-gradient(180deg, #4a90d9, #357abd);
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+        }
+        
+        /* 等号 - 亮蓝 */
+        .btn-eq {
+            background: linear-gradient(180deg, #00d4ff, #0090ff);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        /* 清空 - 红色 */
+        .btn-clear {
+            background: linear-gradient(180deg, #ff6b6b, #e04545);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        /* Shift键 - 黄色 */
         .btn-shift {
             background: linear-gradient(180deg, #e8c547, #d4a830);
             color: #1a1a2e;
             font-weight: 700;
-            font-size: 11px;
-            box-shadow: 0 3px 8px rgba(232,197,71,0.3);
+            font-size: 10px;
         }
+        
+        /* Alpha键 - 红色 */
         .btn-alpha {
             background: linear-gradient(180deg, #ff6b6b, #e04545);
             color: #fff;
             font-weight: 700;
-            font-size: 11px;
-            box-shadow: 0 3px 8px rgba(255,107,107,0.3);
+            font-size: 10px;
         }
+        
+        /* 导航键 */
         .btn-nav {
             background: linear-gradient(180deg, #4a4a6a, #3a3a5a);
             color: #fff;
             font-size: 10px;
         }
-        .btn-func {
-            background: linear-gradient(180deg, #3a3a5a, #2a2a4a);
-            color: #a0a0c0;
-            font-size: 11px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        }
-        .btn-num {
-            background: linear-gradient(180deg, #e8e8f0, #d0d0e0);
-            color: #1a1a2e;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-        }
-        .btn-op {
-            background: linear-gradient(180deg, #4a90d9, #357abd);
-            color: #fff;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 3px 8px rgba(69,144,217,0.3);
-        }
-        .btn-eq {
-            background: linear-gradient(180deg, #00d4ff, #0090ff);
-            color: #fff;
-            font-size: 22px;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,180,255,0.4);
-        }
-        .btn-clear {
-            background: linear-gradient(180deg, #ff6b6b, #e04545);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            box-shadow: 0 3px 8px rgba(255,107,107,0.3);
-        }
-
-        /* ── Wide Buttons ── */
-        .btn-wide { grid-column: span 2; }
-
-        /* ── Shift indicator ── */
-        .shift-indicator {
-            position: absolute;
-            top: -2px;
-            left: 4px;
-            font-size: 8px;
-            color: #e8c547;
-            font-weight: 700;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .btn.shift-active .shift-indicator { opacity: 1; }
-        .btn:active { transform: scale(0.94); }
-
-        /* ── Sub-labels ── */
-        .btn-label { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-        .sub-label {
-            font-size: 8px;
-            color: #e8c547;
-            line-height: 1;
-        }
-
-        /* ── Responsive ── */
-        @media (max-height: 700px) {
-            .calculator { transform: scale(0.88); }
-        }
-        @media (max-height: 600px) {
-            .calculator { transform: scale(0.76); }
-        }
+        
+        /* 子标签 */
+        .btn-inner { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+        .sub-label { font-size: 7px; color: #e8c547; line-height: 1; }
+        
+        /* 响应式 */
+        @media (max-height: 700px) { .calculator { transform: scale(0.9); } }
+        @media (max-height: 600px) { .calculator { transform: scale(0.8); } }
         @media (max-width: 360px) {
             .calculator { width: 300px; padding: 14px 10px 18px; }
-            .btn { min-height: 36px; font-size: 11px; }
-            .btn-num { font-size: 15px; }
-            .btn-op { font-size: 15px; }
-            .display-result { font-size: 26px; }
+            .btn { min-height: 34px; font-size: 11px; }
+            .btn-num, .btn-op { font-size: 14px; }
+            .display-result { font-size: 24px; }
         }
-
-        /* ── Power glow animation ── */
-        @keyframes powerGlow {
-            0%, 100% { text-shadow: 0 0 20px rgba(0,200,255,0.4); }
-            50% { text-shadow: 0 0 30px rgba(0,200,255,0.7), 0 0 50px rgba(0,150,255,0.3); }
-        }
-        .display-result { animation: powerGlow 3s ease-in-out infinite; }
+        
+        /* 结果发光动画 */
+        @keyframes glow { 0%,100% { text-shadow: 0 0 15px rgba(0,200,255,0.4); } 50% { text-shadow: 0 0 25px rgba(0,200,255,0.7); } }
+        .display-result { animation: glow 3s ease-in-out infinite; }
     </style>
 </head>
 <body>
-<div class="calculator" id="calc">
-    <!-- Brand -->
+<div class="calculator">
     <div class="brand">
-        <div class="brand-left">
+        <div>
             <div class="brand-name">CASIO</div>
             <div class="brand-model">fx-991CN X</div>
         </div>
         <div class="brand-badge">NATURAL-V.P.A.M.</div>
     </div>
-
-    <!-- Solar Panel -->
+    
     <div class="solar-panel">
         <div class="solar-cell"></div>
         <div class="solar-cell"></div>
         <div class="solar-cell"></div>
         <div class="solar-cell"></div>
     </div>
-
-    <!-- Display -->
-    <div class="display-container">
+    
+    <div class="display">
         <div class="display-mode">
             <span class="mode-tag" id="modeTag">COMP</span>
-            <span class="mode-tag inactive" id="shiftTag">S</span>
-            <span class="mode-tag inactive" id="alphaTag">α</span>
-            <span class="mode-tag" id="degRadTag">DEG</span>
+            <span class="mode-tag off" id="shiftTag">S</span>
+            <span class="mode-tag off" id="degRadTag">DEG</span>
         </div>
-        <div class="display-expression" id="expression"></div>
+        <div class="display-expr" id="expression"></div>
         <div class="display-result" id="result">0</div>
     </div>
-
-    <!-- Buttons -->
+    
     <div class="btn-grid">
-        <!-- Row 1: Shift / Alpha / Navigation -->
-        <button class="btn btn-shift" data-action="shift" id="shiftBtn">SHIFT</button>
-        <button class="btn btn-alpha" data-action="alpha">ALPHA</button>
-        <button class="btn btn-nav" data-action="up">▲</button>
-        <button class="btn btn-nav" data-action="left">◄</button>
-        <button class="btn btn-nav" data-action="right">►</button>
-
-        <!-- Row 2: Scientific functions -->
-        <button class="btn btn-func" data-action="frac">
-            <span class="btn-label">
-                <span class="sub-label">a/b</span>
-                <span>✿</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="sqrt">
-            <span class="btn-label">
-                <span class="sub-label">∛</span>
-                <span>√□</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="square">
-            <span class="btn-label">
-                <span class="sub-label">x³</span>
-                <span>x²</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="power">
-            <span class="btn-label">
-                <span class="sub-label">ˣ√</span>
-                <span>xʸ</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="log">
-            <span class="btn-label">
-                <span class="sub-label">10ˣ</span>
-                <span>log</span>
-            </span>
-        </button>
-
-        <!-- Row 3 -->
-        <button class="btn btn-func" data-action="ln">
-            <span class="btn-label">
-                <span class="sub-label">eˣ</span>
-                <span>ln</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="sin">
-            <span class="btn-label">
-                <span class="sub-label">sin⁻¹</span>
-                <span>sin</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="cos">
-            <span class="btn-label">
-                <span class="sub-label">cos⁻¹</span>
-                <span>cos</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="tan">
-            <span class="btn-label">
-                <span class="sub-label">tan⁻¹</span>
-                <span>tan</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="inv">
-            <span class="btn-label">
-                <span class="sub-label">x!</span>
-                <span>1/x</span>
-            </span>
-        </button>
-
-        <!-- Row 4 -->
-        <button class="btn btn-func" data-action="abs">|x|</button>
-        <button class="btn btn-func" data-action="paren">
-            <span class="btn-label">
-                <span>(</span><span>)</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="scientific">
-            <span class="btn-label">
-                <span class="sub-label">ENG</span>
-                <span>a×10ᵇ</span>
-            </span>
-        </button>
-        <button class="btn btn-func" data-action="percent">%</button>
-        <button class="btn btn-func" data-action="ans">Ans</button>
-
-        <!-- Row 5: Numbers row 7-8-9 ÷ -->
-        <button class="btn btn-clear" data-action="clear">AC</button>
-        <button class="btn btn-num" data-action="num" data-val="7">7</button>
-        <button class="btn btn-num" data-action="num" data-val="8">8</button>
-        <button class="btn btn-num" data-action="num" data-val="9">9</button>
-        <button class="btn btn-op" data-action="op" data-val="÷">÷</button>
-
-        <!-- Row 6 -->
-        <button class="btn btn-func" data-action="backspace">⌫</button>
-        <button class="btn btn-num" data-action="num" data-val="4">4</button>
-        <button class="btn btn-num" data-action="num" data-val="5">5</button>
-        <button class="btn btn-num" data-action="num" data-val="6">6</button>
-        <button class="btn btn-op" data-action="op" data-val="×">×</button>
-
-        <!-- Row 7 -->
-        <button class="btn btn-func" data-action="neg">(-)</button>
-        <button class="btn btn-num" data-action="num" data-val="1">1</button>
-        <button class="btn btn-num" data-action="num" data-val="2">2</button>
-        <button class="btn btn-num" data-action="num" data-val="3">3</button>
-        <button class="btn btn-op" data-action="op" data-val="-">−</button>
-
-        <!-- Row 8 -->
-        <button class="btn btn-func" data-action="pi">π</button>
-        <button class="btn btn-num" data-action="num" data-val="0">0</button>
-        <button class="btn btn-num" data-action="dot">.</button>
-        <button class="btn btn-op" data-action="op" data-val="+">+</button>
-        <button class="btn btn-eq" data-action="equal">=</button>
+        <!-- Row 1: Shift, Alpha, Nav -->
+        <button class="btn btn-shift" onclick="toggleShift()">SHIFT</button>
+        <button class="btn btn-alpha">ALPHA</button>
+        <button class="btn btn-nav">▲</button>
+        <button class="btn btn-nav">◄</button>
+        <button class="btn btn-nav">►</button>
+        
+        <!-- Row 2: 科学函数 -->
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">a/b</span><span>✿</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">∛</span><span>√□</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">x³</span><span>x²</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">ˣ√</span><span>xʸ</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">10ˣ</span><span>log</span></div></button>
+        
+        <!-- Row 3: 更多函数 -->
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">eˣ</span><span>ln</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">sin⁻¹</span><span>sin</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">cos⁻¹</span><span>cos</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">tan⁻¹</span><span>tan</span></div></button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">x!</span><span>1/x</span></div></button>
+        
+        <!-- Row 4: 辅助功能 -->
+        <button class="btn btn-func">|x|</button>
+        <button class="btn btn-func">( )</button>
+        <button class="btn btn-func"><div class="btn-inner"><span class="sub-label">ENG</span><span>a×10ᵇ</span></div></button>
+        <button class="btn btn-func">%</button>
+        <button class="btn btn-func">Ans</button>
+        
+        <!-- Row 5: 数字 7-8-9 ÷ -->
+        <button class="btn btn-clear">AC</button>
+        <button class="btn btn-num" onclick="press('7')">7</button>
+        <button class="btn btn-num" onclick="press('8')">8</button>
+        <button class="btn btn-num" onclick="press('9')">9</button>
+        <button class="btn btn-op" onclick="press('÷')">÷</button>
+        
+        <!-- Row 6: 删除 4-5-6 × -->
+        <button class="btn btn-func">⌫</button>
+        <button class="btn btn-num" onclick="press('4')">4</button>
+        <button class="btn btn-num" onclick="press('5')">5</button>
+        <button class="btn btn-num" onclick="press('6')">6</button>
+        <button class="btn btn-op" onclick="press('×')">×</button>
+        
+        <!-- Row 7: 负号 1-2-3 - -->
+        <button class="btn btn-func">(-)</button>
+        <button class="btn btn-num" onclick="press('1')">1</button>
+        <button class="btn btn-num" onclick="press('2')">2</button>
+        <button class="btn btn-num" onclick="press('3')">3</button>
+        <button class="btn btn-op" onclick="press('−')">−</button>
+        
+        <!-- Row 8: π 0 . + = -->
+        <button class="btn btn-func">π</button>
+        <button class="btn btn-num" onclick="press('0')">0</button>
+        <button class="btn btn-num" onclick="press('.')">.</button>
+        <button class="btn btn-op" onclick="press('+')">+</button>
+        <button class="btn btn-eq" onclick="calculate()">=</button>
     </div>
 </div>
 
 <script>
-(function () {
-    'use strict';
-
-    // ── State ──
-    let expression = '';
-    let displayExpr = '';
-    let currentResult = '0';
-    let lastAnswer = 0;
-    let shiftActive = false;
-    let alphaActive = false;
-    let angleMode = 'DEG'; // DEG | RAD
-    let openParens = 0;
-
+(function() {
+    let expr = '', display = '', result = '0', lastAns = 0, shift = false;
+    
     const exprEl = document.getElementById('expression');
-    const resultEl = document.getElementById('result');
-    const shiftTag = document.getElementById('shiftTag');
-    const alphaTag = document.getElementById('alphaTag');
-    const degRadTag = document.getElementById('degRadTag');
-
-    // ── Helpers ──
-    function toRad(deg) { return deg * Math.PI / 180; }
-    function toDeg(rad) { return rad * 180 / Math.PI; }
-
-    function formatNumber(n) {
-        if (typeof n !== 'number' || !isFinite(n)) {
-            if (isNaN(n)) return 'Math ERROR';
-            return n > 0 ? '∞' : '-∞';
-        }
-        if (Math.abs(n) > 1e15 || (Math.abs(n) < 1e-10 && n !== 0)) {
-            return n.toExponential(6);
-        }
-        const s = n.toPrecision(10);
-        return parseFloat(s).toString();
+    const resEl = document.getElementById('result');
+    const shiftEl = document.getElementById('shiftTag');
+    
+    function toRad(d) { return d * Math.PI / 180; }
+    function toDeg(r) { return r * 180 / Math.PI; }
+    
+    function fmt(n) {
+        if (typeof n !== 'number' || !isFinite(n)) return isNaN(n) ? 'Math ERROR' : (n > 0 ? '∞' : '-∞');
+        if (Math.abs(n) > 1e15 || (Math.abs(n) < 1e-10 && n !== 0)) return n.toExponential(6);
+        return parseFloat(n.toPrecision(10)).toString();
     }
-
-    function factorial(n) {
-        if (n < 0 || !Number.isInteger(n)) return NaN;
-        if (n > 170) return Infinity;
-        let r = 1;
-        for (let i = 2; i <= n; i++) r *= i;
-        return r;
-    }
-
-    // ── Safe expression evaluator ──
-    function evaluateExpression(expr) {
-        // Replace display symbols with JS operators
-        let e = expr
-            .replace(/×/g, '*')
-            .replace(/÷/g, '/')
-            .replace(/−/g, '-')
-            .replace(/π/g, `(${Math.PI})`)
-            .replace(/e/g, `(${Math.E})`)
-            // Trigonometry: wrap argument in conversion if DEG
-            .replace(/sin\(([^)]+)\)/g, (_, a) => {
-                const inner = angleMode === 'DEG' ? `(${toRad(Number(a))})` : `(${a})`;
-                return Math.sin(inner);
-            })
-            .replace(/cos\(([^)]+)\)/g, (_, a) => {
-                const inner = angleMode === 'DEG' ? `(${toRad(Number(a))})` : `(${a})`;
-                return Math.cos(inner);
-            })
-            .replace(/tan\(([^)]+)\)/g, (_, a) => {
-                const inner = angleMode === 'DEG' ? `(${toRad(Number(a))})` : `(${a})`;
-                return Math.tan(inner);
-            })
-            // Inverse trig
-            .replace(/asin\(([^)]+)\)/g, (_, a) => {
-                const v = Math.asin(Number(a));
-                return angleMode === 'DEG' ? toDeg(v) : v;
-            })
-            .replace(/acos\(([^)]+)\)/g, (_, a) => {
-                const v = Math.acos(Number(a));
-                return angleMode === 'DEG' ? toDeg(v) : v;
-            })
-            .replace(/atan\(([^)]+)\)/g, (_, a) => {
-                const v = Math.atan(Number(a));
-                return angleMode === 'DEG' ? toDeg(v) : v;
-            })
-            // Logarithms
+    
+    function evalExpr(e) {
+        let ex = e
+            .replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-')
+            .replace(/π/g, String(Math.PI))
+            .replace(/sin\(([^)]+)\)/g, (_, a) => Math.sin(toRad(Number(a))))
+            .replace(/cos\(([^)]+)\)/g, (_, a) => Math.cos(toRad(Number(a))))
+            .replace(/tan\(([^)]+)\)/g, (_, a) => Math.tan(toRad(Number(a))))
             .replace(/log\(([^)]+)\)/g, (_, a) => Math.log10(Number(a)))
             .replace(/ln\(([^)]+)\)/g, (_, a) => Math.log(Number(a)))
-            // Powers
             .replace(/√\(/g, 'Math.sqrt(')
-            .replace(/∛\(/g, 'Math.cbrt(')
-            .replace(/\^/g, '**')
-            // Other functions
-            .replace(/\|([^|]+)\|/g, 'Math.abs($1)')
-            .replace(/ans/g, `(${lastAnswer})`);
-
-        // Handle implicit multiplication: 2π, 2(, )(
-        e = e.replace(/(\d)([π(e])/g, '$1*$2');
-        e = e.replace(/(\d)\(/g, '$1*(');
-        e = e.replace(/\)(\d)/g, ')*$1');
-        e = e.replace(/\)([π(e])/g, ')*$1');
-
-        try {
-            // Use Function constructor for safe eval (no global access)
-            const result = new Function(`"use strict"; return (${e})`)();
-            return result;
-        } catch (err) {
-            return NaN;
-        }
+            .replace(/\^/g, '**');
+        // 隐式乘法
+        ex = ex.replace(/(\d)([π])/g, '$1*$2').replace(/(\d)\(/g, '$1*(');
+        try { return new Function('return (' + ex + ')')(); }
+        catch(e) { return NaN; }
     }
-
-    // ── Update display ──
-    function updateDisplay() {
-        exprEl.textContent = displayExpr || ' ';
-        resultEl.textContent = currentResult;
-        resultEl.classList.remove('error');
-        // Auto-scroll expression
+    
+    function update() {
+        exprEl.textContent = display || ' ';
+        resEl.textContent = result;
+        resEl.classList.remove('error');
         exprEl.scrollLeft = exprEl.scrollWidth;
-        resultEl.scrollLeft = resultEl.scrollWidth;
+        resEl.scrollLeft = resEl.scrollWidth;
     }
-
-    // ── Button handler ──
-    function handleAction(action, val) {
-        // Shift / Alpha toggle
-        if (action === 'shift') {
-            shiftActive = !shiftActive;
-            alphaActive = false;
-            shiftTag.className = 'mode-tag' + (shiftActive ? '' : ' inactive');
-            alphaTag.className = 'mode-tag inactive';
-            updateShiftIndicators();
-            return;
-        }
-        if (action === 'alpha') {
-            alphaActive = !alphaActive;
-            shiftActive = false;
-            alphaTag.className = 'mode-tag' + (alphaActive ? '' : ' inactive');
-            shiftTag.className = 'mode-tag inactive';
-            updateShiftIndicators();
-            return;
-        }
-
-        // Handle shift-modified actions
-        if (shiftActive) {
-            shiftActive = false;
-            shiftTag.className = 'mode-tag inactive';
-            updateShiftIndicators();
-
-            switch (action) {
-                case 'sin': action = 'asin'; break;
-                case 'cos': action = 'acos'; break;
-                case 'tan': action = 'atan'; break;
-                case 'log': action = 'pow10'; break;
-                case 'ln':  action = 'exp';  break;
-                case 'sqrt': action = 'cbrt'; break;
-                case 'square': action = 'cube'; break;
-                case 'pi': action = 'e_const'; break;
-                case 'neg': action = 'percent'; break;
-            }
-        }
-
-        switch (action) {
-            case 'num':
-                displayExpr += val;
-                expression += val;
-                break;
-
-            case 'dot':
-                displayExpr += '.';
-                expression += '.';
-                break;
-
-            case 'op':
-                displayExpr += ' ' + val + ' ';
-                expression += val === '÷' ? '/' : val === '×' ? '*' : val === '−' ? '-' : val;
-                break;
-
-            case 'clear':
-                displayExpr = '';
-                expression = '';
-                currentResult = '0';
-                updateDisplay();
-                return;
-
-            case 'backspace':
-                // Remove last token from displayExpr (handle spaces around operators)
-                displayExpr = displayExpr.trimEnd();
-                if (displayExpr.endsWith(' ')) {
-                    displayExpr = displayExpr.slice(0, -1).trimEnd();
-                }
-                expression = expression.replace(/\s*[÷×−]\s*$/, '').replace(/\s*$/, '');
-                // Also remove last number
-                expression = expression.replace(/\d*\.?\d*$/, '');
-                // Recalculate display expression
-                currentResult = formatNumber(evaluateExpression(expression + displayExpr));
-                updateDisplay();
-                return;
-
-            case 'equal':
-                const result = evaluateExpression(expression + displayExpr);
-                currentResult = formatNumber(result);
-                if (currentResult === 'Math ERROR') {
-                    resultEl.classList.add('error');
-                } else {
-                    lastAnswer = result;
-                }
-                // Keep expression for continued calculation
-                expression = currentResult === 'Math ERROR' ? '' : currentResult;
-                displayExpr = '';
-                updateDisplay();
-                return;
-
-            case 'paren':
-                // Smart paren: close if more open than closed
-                const openCount = (displayExpr + expression).split('(').length - 1;
-                const closeCount = (displayExpr + expression).split(')').length - 1;
-                if (openCount > closeCount) {
-                    displayExpr += ')';
-                    expression += ')';
-                } else {
-                    displayExpr += '(';
-                    expression += '(';
-                }
-                break;
-
-            case 'sqrt':
-                displayExpr += '√(';
-                expression += '√(';
-                break;
-
-            case 'cbrt':
-                displayExpr += '∛(';
-                expression += '∛(';
-                break;
-
-            case 'square':
-                displayExpr += '²';
-                expression += '^2';
-                break;
-
-            case 'cube':
-                displayExpr += '³';
-                expression += '^3';
-                break;
-
-            case 'power':
-                displayExpr += '^(';
-                expression += '^(';
-                break;
-
-            case 'sin':
-                displayExpr += 'sin(';
-                expression += 'sin(';
-                break;
-
-            case 'cos':
-                displayExpr += 'cos(';
-                expression += 'cos(';
-                break;
-
-            case 'tan':
-                displayExpr += 'tan(';
-                expression += 'tan(';
-                break;
-
-            case 'asin':
-                displayExpr += 'sin⁻¹(';
-                expression += 'asin(';
-                break;
-
-            case 'acos':
-                displayExpr += 'cos⁻¹(';
-                expression += 'acos(';
-                break;
-
-            case 'atan':
-                displayExpr += 'tan⁻¹(';
-                expression += 'atan(';
-                break;
-
-            case 'log':
-                displayExpr += 'log(';
-                expression += 'log(';
-                break;
-
-            case 'pow10':
-                displayExpr += '10^(';
-                expression += '10^(';
-                break;
-
-            case 'ln':
-                displayExpr += 'ln(';
-                expression += 'ln(';
-                break;
-
-            case 'exp':
-                displayExpr += 'e^(';
-                expression += 'Math.exp(';
-                break;
-
-            case 'pi':
-                displayExpr += 'π';
-                expression += 'π';
-                break;
-
-            case 'e_const':
-                displayExpr += 'e';
-                expression += 'e';
-                break;
-
-            case 'abs':
-                displayExpr += '|';
-                expression += '|';
-                break;
-
-            case 'inv':
-                displayExpr = '(1÷(' + displayExpr + '))';
-                expression = '(1/(' + expression + '))';
-                break;
-
-            case 'neg':
-                if (displayExpr.startsWith('-')) {
-                    displayExpr = displayExpr.slice(1);
-                    expression = expression.replace(/^-/, '');
-                } else {
-                    displayExpr = '-' + displayExpr;
-                    expression = '-' + expression;
-                }
-                break;
-
-            case 'percent':
-                const num = parseFloat(displayExpr) || 0;
-                displayExpr = formatNumber(num / 100);
-                expression = displayExpr;
-                break;
-
-            case 'scientific':
-                // Toggle between regular and scientific notation
-                if (currentResult && currentResult !== 'Math ERROR') {
-                    const n = parseFloat(currentResult);
-                    displayExpr = n.toExponential(6);
-                    expression = displayExpr;
-                }
-                break;
-
-            case 'ans':
-                displayExpr += 'Ans';
-                expression += 'ans';
-                break;
-
-            case 'frac':
-                displayExpr += '/(';
-                expression += '/(';
-                break;
-        }
-
-        // Live preview
-        if (action !== 'clear' && action !== 'equal') {
-            const preview = evaluateExpression(expression + displayExpr);
-            if (!isNaN(preview) && isFinite(preview)) {
-                currentResult = formatNumber(preview);
-            }
-        }
-
-        updateDisplay();
-    }
-
-    function updateShiftIndicators() {
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.classList.toggle('shift-active', shiftActive);
-        });
-    }
-
-    // ── Event binding ──
-    document.getElementById('calc').addEventListener('click', function (e) {
-        const btn = e.target.closest('.btn');
-        if (!btn) return;
-        const action = btn.dataset.action;
-        const val = btn.dataset.val;
-        handleAction(action, val);
+    
+    window.press = function(val) {
+        display += val;
+        expr += val;
+        // 实时预览
+        const preview = evalExpr(expr);
+        if (!isNaN(preview) && isFinite(preview)) result = fmt(preview);
+        update();
+    };
+    
+    window.calculate = function() {
+        const r = evalExpr(expr);
+        result = fmt(r);
+        if (result === 'Math ERROR') resEl.classList.add('error');
+        else lastAns = r;
+        expr = result === 'Math ERROR' ? '' : result;
+        display = '';
+        update();
+    };
+    
+    window.toggleShift = function() {
+        shift = !shift;
+        shiftEl.className = 'mode-tag' + (shift ? '' : ' off');
+    };
+    
+    // 键盘支持
+    document.addEventListener('keydown', e => {
+        if (/^[0-9]$/.test(e.key)) press(e.key);
+        else if (e.key === '+') press('+');
+        else if (e.key === '-') press('−');
+        else if (e.key === '*') press('×');
+        else if (e.key === '/') { e.preventDefault(); press('÷'); }
+        else if (e.key === '.') press('.');
+        else if (e.key === 'Enter' || e.key === '=') calculate();
+        else if (e.key === 'Backspace') { display = display.slice(0,-1); expr = expr.slice(0,-1); update(); }
+        else if (e.key === 'Escape') { display = expr = ''; result = '0'; update(); }
     });
-
-    // ── Keyboard support ──
-    document.addEventListener('keydown', function (e) {
-        const key = e.key;
-        if (/^[0-9]$/.test(key)) handleAction('num', key);
-        else if (key === '+') handleAction('op', '+');
-        else if (key === '-') handleAction('op', '−');
-        else if (key === '*') handleAction('op', '×');
-        else if (key === '/') { e.preventDefault(); handleAction('op', '÷'); }
-        else if (key === '.') handleAction('dot');
-        else if (key === 'Enter' || key === '=') handleAction('equal');
-        else if (key === 'Backspace') handleAction('backspace');
-        else if (key === 'Escape') handleAction('clear');
-        else if (key === '(') handleAction('paren');
-        else if (key === ')') handleAction('paren');
-        else if (key === '^') handleAction('power');
-        else if (key === 'p') handleAction('pi');
-    });
-
-    // ── Init ──
-    updateDisplay();
+    
+    update();
 })();
 </script>
 </body>
