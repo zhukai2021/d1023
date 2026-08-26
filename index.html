@@ -2,92 +2,49 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>文件列表 — zhukai2021/d1023</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件清单 · d1023</title>
 <style>
-:root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #58a6ff; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; }
-.container { max-width: 1000px; margin: 0 auto; }
-h1 { font-size: 1.8rem; margin-bottom: 1rem; color: #fff; }
-.card { background: var(--card); border-radius: 6px; border: 1px solid #30363d; padding: 1rem; margin-bottom: 1rem; }
-.info { font-size: 0.9rem; color: #8b949e; margin-bottom: 1rem; }
-.file-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
-.file-item { background: #21262d; border-radius: 6px; padding: 0.8rem; display: flex; justify-content: space-between; align-items: center; transition: transform 0.15s; }
-.file-item:hover { transform: translateY(-2px); border: 1px solid var(--accent); }
-.name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
-.icon { margin-right: 0.6rem; font-size: 1.2rem; }
-.size { color: #8b949e; font-size: 0.8rem; margin-right: 0.8rem; flex-shrink: 0; }
-.link { color: #58a6ff; text-decoration: none; flex-shrink: 0; }
-.link:hover { text-decoration: underline; }
-.loading { color: #8b949e; text-align: center; padding: 2rem; }
-.error { color: #f85149; text-align: center; padding: 2rem; }
-.updated { color: #8b949e; font-size: 0.8rem; margin-top: 1rem; }
+  :root { --fg:#1f2328; --muted:#8a929b; --line:#e4e7eb; --bg:#ffffff; --accent:#2f6feb; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 20px; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", Segoe UI, Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; font-weight: 600; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  li {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    padding: 11px 4px; border-bottom: 1px solid var(--line); font-size: 15px;
+  }
+  .name { word-break: break-all; }
+  .name a { color: var(--fg); text-decoration: none; }
+  .name a:hover { color: var(--accent); text-decoration: underline; }
+  .time { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 </style>
 </head>
 <body>
-<div class="container">
-<h1>📁 文件列表</h1>
-<div class="card">
-<div class="info">仓库：<a href="https://github.com/zhukai2021/d1023" target="_blank" style="color:#58a6ff;">zhukai2021/d1023</a> | <span style="color:#3fb950;">⚡ 动态加载</span>（打开时实时同步仓库文件，新增文件刷新即可见）| 相对路径链接（适配 GitHub Pages / Cloudflare Pages）</div>
-<div id="file-list" class="file-list"><div class="loading">⏳ 正在加载文件列表...</div></div>
+<div class="wrap">
+  <h1>仓库文件清单</h1>
+  <p class="sub">d1023 · 竖排 · 每行一个文件，行末为最后修改时间</p>
+  <ul>
+    <li><span class="name"><a href="README.md">README.md</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="casio-scientific-calculator.html">casio-scientific-calculator.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="dashboard.html">dashboard.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="hanfu_sakura.png">hanfu_sakura.png</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="hyperframes_0806.html">hyperframes_0806.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="hyperframes_0809.html">hyperframes_0809.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="index.html">index.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="laohuangli.html">laohuangli.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="picture_book.html">picture_book.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="solar-system.html">solar-system.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="solar_system_3d.html">solar_system_3d.html</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="solar_system_3d/linyi_map.svg">solar_system_3d/linyi_map.svg</a></span><span class="time">2026-08-26 20:20</span></li>
+    <li><span class="name"><a href="wanianli.html">wanianli.html</a></span><span class="time">2026-08-26 20:20</span></li>
+  </ul>
 </div>
-<div class="updated" id="updated"></div>
-</div>
-<script>
-const REPO = 'zhukai2021/d1023';
-
-function iconFor(name) {
-  const lower = name.toLowerCase();
-  if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.gif') || lower.endsWith('.svg') || lower.endsWith('.webp')) return '🖼️';
-  if (lower.endsWith('.html') || lower.endsWith('.htm')) return '📄';
-  if (lower.endsWith('.md')) return '📝';
-  if (lower.endsWith('.json') || lower.endsWith('.js') || lower.endsWith('.css')) return '⚙️';
-  if (lower.endsWith('.mp3') || lower.endsWith('.wav') || lower.endsWith('.mp4')) return '🎵';
-  return '📦';
-}
-
-function sizeStr(size) {
-  if (size >= 1024 * 1024) return (size / 1024 / 1024).toFixed(1) + ' MB';
-  if (size >= 1024) return (size / 1024).toFixed(1) + ' KB';
-  return size + ' B';
-}
-
-async function loadFiles() {
-  const listEl = document.getElementById('file-list');
-  const updatedEl = document.getElementById('updated');
-  try {
-    const resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/');
-    if (!resp.ok) {
-      if (resp.status === 403) throw new Error('GitHub API 速率限制（免费额度 60 次/小时/IP），请稍后刷新');
-      throw new Error('HTTP ' + resp.status);
-    }
-    const files = await resp.json();
-    const items = files
-      .filter(f => f.type === 'file' && f.name !== 'index.html')
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    if (items.length === 0) {
-      listEl.innerHTML = '<div class="loading">仓库为空</div>';
-      return;
-    }
-
-    listEl.innerHTML = items.map(f =>
-      '<div class="file-item">' +
-        '<span class="icon">' + iconFor(f.name) + '</span>' +
-        '<span class="name" title="' + f.name + '">' + f.name + '</span>' +
-        '<span class="size">' + sizeStr(f.size) + '</span>' +
-        '<a class="link" href="' + encodeURI(f.name) + '" target="_blank">🔗 打开</a>' +
-      '</div>'
-    ).join('');
-
-    updatedEl.textContent = '共 ' + items.length + ' 个文件 · 实时同步自 GitHub API';
-  } catch (e) {
-    listEl.innerHTML = '<div class="error">❌ 加载失败：' + e.message + '</div>';
-  }
-}
-
-loadFiles();
-</script>
 </body>
 </html>
