@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>文件清单 · d1023</title>
+<title>仓库文件 · d1023</title>
 <style>
-  :root { --fg:#1f2328; --muted:#8a929b; --line:#e4e7eb; --bg:#ffffff; --accent:#2f6feb; }
+  :root { --fg:#1f2328; --muted:#8a929b; --line:#e4e7eb; --bg:#ffffff; --accent:#2f6feb; --soft:#f5f8ff; }
   * { box-sizing: border-box; }
   body {
     margin: 0; padding: 32px 20px; background: var(--bg); color: var(--fg);
@@ -14,37 +14,95 @@
   }
   .wrap { max-width: 760px; margin: 0 auto; }
   h1 { font-size: 20px; margin: 0 0 4px; font-weight: 600; }
-  .sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
+  .status { color: var(--muted); font-size: 13px; margin: 0 0 18px; min-height: 18px; }
   ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   li {
     display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
-    padding: 11px 4px; border-bottom: 1px solid var(--line); font-size: 15px;
+    padding: 11px 8px; border-bottom: 1px solid var(--line); font-size: 15px;
+    transition: background .15s;
   }
+  li:hover { background: var(--soft); }
   .name { word-break: break-all; }
   .name a { color: var(--fg); text-decoration: none; }
   .name a:hover { color: var(--accent); text-decoration: underline; }
   .time { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .dir { color: var(--accent); }
+  .err { color: #d1242f; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>仓库文件清单</h1>
-  <p class="sub">d1023 · 竖排 · 每行一个文件，行末为最后修改时间</p>
-  <ul>
-    <li><span class="name"><a href="README.md">README.md</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="casio-scientific-calculator.html">casio-scientific-calculator.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="dashboard.html">dashboard.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="hanfu_sakura.png">hanfu_sakura.png</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="hyperframes_0806.html">hyperframes_0806.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="hyperframes_0809.html">hyperframes_0809.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="index.html">index.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="laohuangli.html">laohuangli.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="picture_book.html">picture_book.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="solar-system.html">solar-system.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="solar_system_3d.html">solar_system_3d.html</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="solar_system_3d/linyi_map.svg">solar_system_3d/linyi_map.svg</a></span><span class="time">2026-08-26 20:20</span></li>
-    <li><span class="name"><a href="wanianli.html">wanianli.html</a></span><span class="time">2026-08-26 20:20</span></li>
-  </ul>
+  <p class="sub">zhukai2021/d1023 · 动态加载，新增文件自动显示</p>
+  <p class="status" id="status">加载中…</p>
+  <ul id="list"></ul>
 </div>
+<script>
+const REPO = "zhukai2021/d1023";
+const CONTENTS = "https://api.github.com/repos/" + REPO + "/contents";
+const listEl = document.getElementById("list");
+const statusEl = document.getElementById("status");
+
+// 递归列出所有文件（含子目录）
+async function listAll(path) {
+  const res = await fetch(CONTENTS + (path ? "/" + path : ""));
+  if (!res.ok) throw new Error("HTTP " + res.status + " 获取文件列表失败");
+  const items = await res.json();
+  let files = [];
+  for (const it of items) {
+    if (it.type === "dir") files = files.concat(await listAll(it.path));
+    else files.push(it);
+  }
+  return files;
+}
+
+// 取文件最近一次提交时间
+async function mtime(path) {
+  try {
+    const r = await fetch("https://api.github.com/repos/" + REPO + "/commits?path=" + encodeURIComponent(path) + "&per_page=1");
+    if (!r.ok) return "";
+    const j = await r.json();
+    const c = j[0] && j[0].commit;
+    if (!c) return "";
+    return (c.committer && c.committer.date) || (c.author && c.author.date) || "";
+  } catch (e) { return ""; }
+}
+
+function fmt(d) {
+  if (!d) return "";
+  const t = new Date(d), p = n => String(n).padStart(2, "0");
+  return t.getFullYear() + "-" + p(t.getMonth() + 1) + "-" + p(t.getDate()) + " " + p(t.getHours()) + ":" + p(t.getMinutes());
+}
+
+(async () => {
+  try {
+    let files = await listAll();
+    files.sort((a, b) => a.path.localeCompare(b.path));
+    statusEl.textContent = "共 " + files.length + " 个文件（实时来自 GitHub）";
+    const times = await Promise.all(files.map(f => mtime(f.path)));
+    files.forEach((f, i) => {
+      const li = document.createElement("li");
+      const name = document.createElement("span");
+      name.className = "name";
+      const a = document.createElement("a");
+      a.href = f.download_url;          // raw 直链：HTML 可直接运行，图片/SVG 可直接看
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = f.path;
+      name.appendChild(a);
+      const time = document.createElement("span");
+      time.className = "time";
+      time.textContent = fmt(times[i]);
+      li.appendChild(name);
+      li.appendChild(time);
+      listEl.appendChild(li);
+    });
+  } catch (e) {
+    statusEl.innerHTML = '<span class="err">加载失败：' + e.message +
+      '（若为私有仓库或 GitHub API 限流，请稍后重试；也可配置带 token 的构建脚本）</span>';
+  }
+})();
+</script>
 </body>
 </html>
