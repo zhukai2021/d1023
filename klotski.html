@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>华容道</title>
+<style>
+  :root{
+    --cell: 70px;
+    --gap: 6px;
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --line: #d8dee8;
+    --ink: #2b3440;
+    --muted: #8a94a3;
+    --accent: #c0392b;
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh; padding:18px 12px 28px;
+  }
+  h1{ font-size:22px; margin:4px 0 2px; letter-spacing:2px; }
+  .sub{ font-size:13px; color:var(--muted); margin-bottom:14px; }
+  .hud{
+    display:flex; gap:10px; align-items:center; margin-bottom:14px;
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:8px 14px;
+  }
+  .hud .stat{ font-size:14px; }
+  .hud .stat b{ font-size:18px; color:var(--accent); margin-left:4px; }
+  .btn{
+    border:1px solid var(--line); background:#fff; color:var(--ink);
+    border-radius:10px; padding:8px 14px; font-size:14px; cursor:pointer;
+    transition:.15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:active{ transform:scale(.96); }
+  .board-wrap{ position:relative; }
+  #board{
+    position:relative;
+    width: calc(var(--cell) * 4 + var(--gap) * 5);
+    height: calc(var(--cell) * 5 + var(--gap) * 6);
+    background: var(--panel);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding: var(--gap);
+  }
+  /* 底部出口标记 */
+  #board::after{
+    content:"";
+    position:absolute; left: calc(var(--gap) + var(--cell) + var(--gap));
+    width: calc(var(--cell) * 2 + var(--gap));
+    bottom:0; height:4px; background:var(--accent); opacity:.5; border-radius:2px;
+  }
+  .piece{
+    position:absolute;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:15px; color:#fff;
+    cursor:pointer; user-select:none;
+    transition: left .12s ease, top .12s ease, box-shadow .15s, transform .12s;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.18), 0 2px 4px rgba(0,0,0,.12);
+    text-shadow:0 1px 1px rgba(0,0,0,.25);
+  }
+  .piece.sel{ outline:3px solid #2b3440; outline-offset:1px; transform:scale(1.02); z-index:5; }
+  .piece.cao{ background:linear-gradient(135deg,#e74c3c,#c0392b); font-size:20px; }
+  .piece.guan{ background:linear-gradient(135deg,#27ae60,#1e8449); }
+  .piece.gen{ background:linear-gradient(135deg,#2980b9,#1f618d); }
+  .piece.sol{ background:linear-gradient(135deg,#95a5a6,#7f8c8d); }
+  .controls{ display:grid; grid-template-columns:repeat(3,56px); grid-template-rows:repeat(2,56px); gap:8px; margin-top:18px; }
+  .controls button{
+    border:1px solid var(--line); background:#fff; border-radius:12px;
+    font-size:22px; cursor:pointer; color:var(--ink);
+  }
+  .controls button:active{ background:#eef1f5; }
+  .controls .up{ grid-column:2; grid-row:1; }
+  .controls .left{ grid-column:1; grid-row:2; }
+  .controls .down{ grid-column:2; grid-row:2; }
+  .controls .right{ grid-column:3; grid-row:2; }
+  .hint{ font-size:12px; color:var(--muted); margin-top:14px; text-align:center; line-height:1.6; max-width:340px; }
+  #win{
+    position:fixed; inset:0; background:rgba(20,26,34,.55);
+    display:none; align-items:center; justify-content:center; z-index:50;
+  }
+  #win .card{
+    background:#fff; border-radius:16px; padding:26px 30px; text-align:center;
+    box-shadow:0 12px 40px rgba(0,0,0,.3);
+  }
+  #win h2{ margin:0 0 8px; color:var(--accent); }
+  #win p{ margin:4px 0 16px; color:var(--muted); }
+  @media (max-width:420px){
+    :root{ --cell: 64px; }
+  }
+</style>
+</head>
+<body>
+  <h1>华 容 道</h1>
+  <div class="sub">横刀立马 · 助曹操脱身</div>
+
+  <div class="hud">
+    <div class="stat">步数<b id="moves">0</b></div>
+    <button class="btn" id="reset">重新开始</button>
+  </div>
+
+  <div class="board-wrap">
+    <div id="board"></div>
+  </div>
+
+  <div class="controls">
+    <button class="up"    data-dir="up">▲</button>
+    <button class="left"  data-dir="left">◀</button>
+    <button class="down"  data-dir="down">▼</button>
+    <button class="right" data-dir="right">▶</button>
+  </div>
+
+  <div class="hint">
+    点击选中棋子（高亮），再用方向键或下方按钮移动。<br>
+    目标：把红色「曹操」移到最下方出口。
+  </div>
+
+  <div id="win">
+    <div class="card">
+      <h2>曹操脱身！</h2>
+      <p>共 <span id="winMoves">0</span> 步</p>
+      <button class="btn" id="winReset">再来一局</button>
+    </div>
+  </div>
+
+<script>
+const COLS = 4, ROWS = 5;
+const board = document.getElementById('board');
+const movesEl = document.getElementById('moves');
+const winEl = document.getElementById('win');
+const winMovesEl = document.getElementById('winMoves');
+
+// 标准“横刀立马”开局
+function initialState(){
+  return [
+    { id:'cao',  type:'cao',  label:'曹操', x:1, y:1, w:2, h:2 },
+    { id:'guan', type:'guan', label:'关羽', x:1, y:3, w:2, h:1 },
+    { id:'zhang',type:'gen',  label:'张飞', x:0, y:0, w:1, h:2 },
+    { id:'zhao', type:'gen',  label:'赵云', x:3, y:0, w:1, h:2 },
+    { id:'ma',   type:'gen',  label:'马超', x:0, y:2, w:1, h:2 },
+    { id:'huang',type:'gen',  label:'黄忠', x:3, y:2, w:1, h:2 },
+    { id:'b1',   type:'sol',  label:'兵',   x:1, y:0, w:1, h:1 },
+    { id:'b2',   type:'sol',  label:'兵',   x:2, y:0, w:1, h:1 },
+    { id:'b3',   type:'sol',  label:'兵',   x:0, y:4, w:1, h:1 },
+    { id:'b4',   type:'sol',  label:'兵',   x:3, y:4, w:1, h:1 },
+  ];
+}
+
+let pieces = initialState();
+let moves = 0;
+let selected = null;
+
+function cell(){ return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell')); }
+function gap(){ return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')); }
+
+function buildOccupied(exceptId){
+  const occ = Array.from({length:ROWS}, ()=>Array(COLS).fill(null));
+  for(const p of pieces){
+    if(p.id===exceptId) continue;
+    for(let r=0;r<p.h;r++) for(let c=0;c<p.w;c++) occ[p.y+r][p.x+c]=p.id;
+  }
+  return occ;
+}
+
+function canMove(p, dx, dy){
+  const nx=p.x+dx, ny=p.y+dy;
+  if(nx<0 || ny<0 || nx+p.w>COLS || ny+p.h>ROWS) return false;
+  const occ = buildOccupied(p.id);
+  for(let r=0;r<p.h;r++) for(let c=0;c<p.w;c++){
+    if(occ[ny+r][nx+c]!==null) return false;
+  }
+  return true;
+}
+
+function render(){
+  const c=cell(), g=gap();
+  board.innerHTML='';
+  for(const p of pieces){
+    const d=document.createElement('div');
+    d.className='piece '+p.type+(p.id===selected?' sel':'');
+    d.style.left=(g + p.x*(c+g))+'px';
+    d.style.top=(g + p.y*(c+g))+'px';
+    d.style.width=(p.w*c + (p.w-1)*g)+'px';
+    d.style.height=(p.h*c + (p.h-1)*g)+'px';
+    d.textContent=p.label;
+    d.addEventListener('click', ()=>{ selected = (selected===p.id)?null:p.id; render(); });
+    board.appendChild(d);
+  }
+}
+
+function move(dx, dy){
+  const p = pieces.find(q=>q.id===selected);
+  if(!p) return;
+  if(canMove(p, dx, dy)){
+    p.x+=dx; p.y+=dy;
+    moves++; movesEl.textContent=moves;
+    render();
+    checkWin();
+  }
+}
+
+function checkWin(){
+  const cao = pieces.find(p=>p.id==='cao');
+  if(cao.y===3){ // 占据底部两行 (row3-4, col1-2)
+    setTimeout(()=>{
+      winMovesEl.textContent=moves;
+      winEl.style.display='flex';
+    }, 160);
+  }
+}
+
+function reset(){
+  pieces=initialState(); moves=0; selected=null; movesEl.textContent=0;
+  winEl.style.display='none'; render();
+}
+
+// 键盘
+const keymap={ ArrowUp:[0,-1], ArrowDown:[0,1], ArrowLeft:[-1,0], ArrowRight:[1,0],
+               w:[0,-1], s:[0,1], a:[-1,0], d:[1,0] };
+document.addEventListener('keydown', e=>{
+  if(keymap[e.key]){ e.preventDefault(); move(keymap[e.key][0], keymap[e.key][1]); }
+});
+
+// 触屏方向按钮
+document.querySelectorAll('.controls button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const m={ up:[0,-1], down:[0,1], left:[-1,0], right:[1,0] }[b.dataset.dir];
+    move(m[0], m[1]);
+  });
+});
+
+document.getElementById('reset').addEventListener('click', reset);
+document.getElementById('winReset').addEventListener('click', reset);
+
+render();
+</script>
+</body>
+</html>
