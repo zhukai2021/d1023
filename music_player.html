@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>音乐播放器 · 实时频谱</title>
+<style>
+  :root{
+    --bg:#f5f7fb; --card:#ffffff; --ink:#1f2430; --sub:#7a8398;
+    --line:#e6eaf2; --accent:#5b8def; --accent2:#9b6cff; --on:#eef3ff;
+    --shadow:0 10px 30px rgba(31,36,48,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#eef2fb 0%,#f5f7fb 60%);
+    color:var(--ink);display:flex;align-items:center;justify-content:center;
+    padding:18px;min-height:100%;
+  }
+  .app{width:100%;max-width:460px;background:var(--card);border-radius:22px;
+    box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--line)}
+  .head{padding:20px 22px 8px}
+  .head h1{font-size:18px;margin:0 0 2px;letter-spacing:.5px}
+  .head p{margin:0;color:var(--sub);font-size:12.5px}
+  .cover{position:relative;margin:14px 22px;border-radius:18px;overflow:hidden;
+    background:linear-gradient(135deg,#dbe7ff,#e9deff);aspect-ratio:16/9}
+  canvas#viz{width:100%;height:100%;display:block}
+  .cover .hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:#5b6480;font-size:13px;text-align:center;padding:16px;pointer-events:none}
+  .meta{padding:6px 22px 0}
+  .meta .name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .meta .artist{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .prog{padding:14px 22px 4px}
+  .bar{position:relative;height:6px;border-radius:6px;background:var(--on);cursor:pointer}
+  .bar .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:6px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .bar .knob{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translate(-50%,-50%);left:0}
+  .times{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:6px}
+  .ctrls{display:flex;align-items:center;justify-content:center;gap:18px;padding:14px 22px 8px}
+  .btn{width:52px;height:52px;border:none;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;cursor:pointer;background:var(--on);color:var(--accent);transition:.15s}
+  .btn:active{transform:scale(.94)}
+  .btn.play{width:62px;height:62px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+    box-shadow:0 8px 20px rgba(91,141,239,.35)}
+  .btn svg{width:24px;height:24px}
+  .vol{display:flex;align-items:center;gap:10px;padding:6px 22px 20px}
+  .vol svg{width:18px;height:18px;color:var(--sub);flex:0 0 auto}
+  .vol input{flex:1;accent-color:var(--accent)}
+  .foot{padding:0 22px 18px;display:flex;gap:10px}
+  .foot label{flex:1;text-align:center;font-size:12.5px;color:var(--accent);
+    background:var(--on);border:1px dashed var(--line);border-radius:12px;padding:10px;cursor:pointer}
+  .foot label:active{background:#e3ecff}
+  .err{padding:0 22px 14px;color:#d4694a;font-size:12.5px;display:none}
+  input[type=file]{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="head">
+    <h1>音乐播放器</h1>
+    <p>实时频谱 · 换曲自动匹配</p>
+  </div>
+
+  <div class="cover">
+    <canvas id="viz"></canvas>
+    <div class="hint" id="hint">点击下方播放，加载 62.mp3<br>（或拖入 / 选择本地音乐）</div>
+  </div>
+
+  <div class="meta">
+    <div class="name" id="name">62.mp3</div>
+    <div class="artist" id="artist">仓库音频</div>
+  </div>
+
+  <div class="prog">
+    <div class="bar" id="bar"><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div>
+    <div class="times"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+  </div>
+
+  <div class="ctrls">
+    <button class="btn" id="prev" title="回到开头">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zm3.5 7l8.5 6V6z"/></svg>
+    </button>
+    <button class="btn play" id="play" title="播放/暂停">
+      <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="btn" id="next" title="静音切换">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9zm13.5 3a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4z"/></svg>
+    </button>
+  </div>
+
+  <div class="vol">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9zm13.5 3a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4z"/></svg>
+    <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8">
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <div class="foot">
+    <label for="file">选择本地音乐</label>
+    <label id="drop">拖入音乐文件</label>
+  </div>
+  <input type="file" id="file" accept="audio/*">
+</div>
+
+<audio id="audio" crossorigin="anonymous" preload="auto"></audio>
+
+<script>
+(function(){
+  const audio = document.getElementById('audio');
+  const playBtn = document.getElementById('play');
+  const playIcon = document.getElementById('playIcon');
+  const prevBtn = document.getElementById('prev');
+  const volEl = document.getElementById('vol');
+  const bar = document.getElementById('bar');
+  const fill = document.getElementById('fill');
+  const knob = document.getElementById('knob');
+  const curEl = document.getElementById('cur');
+  const durEl = document.getElementById('dur');
+  const nameEl = document.getElementById('name');
+  const artistEl = document.getElementById('artist');
+  const hint = document.getElementById('hint');
+  const errEl = document.getElementById('err');
+  const fileInput = document.getElementById('file');
+  const canvas = document.getElementById('viz');
+  const ctx = canvas.getContext('2d');
+
+  // ---- 默认曲目：仓库内的 62.mp3（相对路径，GitHub Pages / 本地服务器自动可用）----
+  const DEFAULT_SRC = '62.mp3';
+  audio.src = DEFAULT_SRC;
+  let currentName = '62.mp3';
+
+  // ---- Web Audio：AnalyserNode 实时频谱（换曲自动匹配的本质）----
+  let audioCtx, analyser, sourceNode, gainNode, freqData, timeData;
+  function ensureAudioGraph(){
+    if(audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;            // 频域精度
+    analyser.smoothingTimeConstant = 0.82;
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = parseFloat(volEl.value);
+    // MediaElementSource 每元素只能建一次，复用即可切歌自动接上频谱
+    sourceNode = audioCtx.createMediaElementSource(audio);
+    sourceNode.connect(analyser);
+    analyser.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    freqData = new Uint8Array(analyser.frequencyBinCount);
+    timeData = new Uint8Array(analyser.fftSize);
+  }
+
+  // ---- 播放 / 暂停（需用户交互才能启动 AudioContext）----
+  async function togglePlay(){
+    ensureAudioGraph();
+    if(audioCtx.state === 'suspended') await audioCtx.resume();
+    if(audio.paused){ try{ await audio.play(); }catch(e){ showErr('无法播放：'+(e.message||'请检查 62.mp3 是否在仓库内')); } }
+    else audio.pause();
+  }
+  playBtn.addEventListener('click', togglePlay);
+  prevBtn.addEventListener('click', ()=>{ audio.currentTime = 0; });
+  audio.addEventListener('play', ()=>{ playIcon.innerHTML='<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'; hint.style.display='none'; });
+  audio.addEventListener('pause', ()=>{ playIcon.innerHTML='<path d="M8 5v14l11-7z"/>'; });
+  audio.addEventListener('ended', ()=>{ playIcon.innerHTML='<path d="M8 5v14l11-7z"/>'; });
+
+  audio.addEventListener('error', ()=>{
+    if(audio.src.indexOf('blob:')===0) return; // 本地文件不报此错
+    showErr('未找到 '+currentName+'：请把它放进仓库目录后推送，或用下方选择本地音乐。');
+    hint.style.display='flex';
+  });
+
+  function showErr(msg){ errEl.textContent = msg; errEl.style.display='block'; }
+  function clearErr(){ errEl.style.display='none'; }
+
+  // ---- 时间 / 进度 ----
+  function fmt(t){ if(!isFinite(t)) return '0:00'; const m=Math.floor(t/60), s=Math.floor(t%60); return m+':'+String(s).padStart(2,'0'); }
+  audio.addEventListener('loadedmetadata', ()=>{ durEl.textContent = fmt(audio.duration); });
+  audio.addEventListener('timeupdate', ()=>{
+    const p = audio.duration? audio.currentTime/audio.duration : 0;
+    fill.style.width = (p*100)+'%'; knob.style.left = (p*100)+'%';
+    curEl.textContent = fmt(audio.currentTime);
+  });
+  function seek(ev){
+    const r = bar.getBoundingClientRect();
+    let p = (ev.clientX - r.left)/r.width; p = Math.max(0,Math.min(1,p));
+    if(audio.duration) audio.currentTime = p*audio.duration;
+  }
+  let seeking=false;
+  bar.addEventListener('mousedown', e=>{ seeking=true; seek(e); });
+  bar.addEventListener('touchstart', e=>{ seeking=true; seek(e.touches[0]); }, {passive:true});
+  bar.addEventListener('mousemove', e=>{ if(seeking) seek(e); });
+  bar.addEventListener('touchmove', e=>{ if(seeking) seek(e.touches[0]); }, {passive:true});
+  window.addEventListener('mouseup', ()=>seeking=false);
+  window.addEventListener('touchend', ()=>seeking=false);
+
+  // ---- 音量 ----
+  volEl.addEventListener('input', ()=>{
+    audio.volume = parseFloat(volEl.value);
+    if(gainNode) gainNode.gain.value = parseFloat(volEl.value);
+  });
+
+  // ---- 本地文件 / 拖拽：换曲频谱自动匹配（实时分析，无需任何配置）----
+  function loadLocalFile(file){
+    if(!file) return;
+    clearErr();
+    currentName = file.name;
+    nameEl.textContent = file.name;
+    artistEl.textContent = '本地文件';
+    const url = URL.createObjectURL(file);
+    audio.src = url;
+    audio.play().then(()=>{ ensureAudioGraph(); if(audioCtx.state==='suspended') audioCtx.resume(); }).catch(()=>{});
+  }
+  fileInput.addEventListener('change', e=> loadLocalFile(e.target.files[0]));
+  ['dragover','dragenter'].forEach(ev=> document.getElementById('drop').addEventListener(ev, e=>{e.preventDefault();}));
+  document.getElementById('drop').addEventListener('drop', e=>{ e.preventDefault(); loadLocalFile(e.dataTransfer.files[0]); });
+  // 整页拖拽
+  window.addEventListener('dragover', e=>e.preventDefault());
+  window.addEventListener('drop', e=>{ e.preventDefault(); if(e.dataTransfer.files[0]) loadLocalFile(e.dataTransfer.files[0]); });
+
+  // ---- 频谱绘制（canvas，实时）----
+  function resize(){
+    const dpr = window.devicePixelRatio||1;
+    const r = canvas.getBoundingClientRect();
+    canvas.width = r.width*dpr; canvas.height = r.height*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize', resize); resize();
+
+  let hue = 210;
+  function draw(){
+    requestAnimationFrame(draw);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
+
+    if(!analyser){ // 待机：柔和呼吸条
+      const t = Date.now()/1000;
+      for(let i=0;i<48;i++){
+        const bh = (Math.sin(t*1.5 + i*0.35)+1)*0.5* h*0.18 + 4;
+        ctx.fillStyle = `rgba(91,141,239,${0.25+0.4*Math.sin(t+i)})`;
+        ctx.fillRect(i*(w/48)+2, h-bh, w/48-4, bh);
+      }
+      return;
+    }
+
+    analyser.getByteFrequencyData(freqData);
+    analyser.getByteTimeDomainData(timeData);
+
+    // 根据整体能量轻微偏移色相，让频谱"跟音乐呼吸"
+    let sum=0; for(let i=0;i<freqData.length;i++) sum+=freqData[i];
+    const energy = sum/freqData.length/255;
+    hue = (hue + 0.3 + energy*1.5) % 360;
+
+    // 频域柱状（取低-中频为主，视觉更饱满）
+    const bars = 64;
+    const step = Math.floor(freqData.length*0.6 / bars);
+    const bw = w/bars;
+    for(let i=0;i<bars;i++){
+      let v=0; for(let j=0;j<step;j++) v+=freqData[i*step+j];
+      v = v/step/255;
+      const bh = Math.pow(v,0.9)*h*0.95 + 2;
+      const grad = ctx.createLinearGradient(0,h,0,h-bh);
+      grad.addColorStop(0, `hsla(${hue},85%,62%,0.95)`);
+      grad.addColorStop(1, `hsla(${(hue+40)%360},90%,70%,0.95)`);
+      ctx.fillStyle = grad;
+      const x = i*bw;
+      ctx.fillRect(x+1, h-bh, bw-2, bh);
+      // 顶部高光
+      ctx.fillStyle = `hsla(${(hue+40)%360},95%,82%,0.9)`;
+      ctx.fillRect(x+1, h-bh, bw-2, 2);
+    }
+
+    // 中央波形（时域）叠加
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = `hsla(${(hue+200)%360},80%,55%,0.5)`;
+    ctx.beginPath();
+    for(let i=0;i<timeData.length;i++){
+      const x = i/timeData.length*w;
+      const y = (timeData[i]/255)*h;
+      i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+    }
+    ctx.stroke();
+  }
+  draw();
+
+  // 尝试自动播放（多数浏览器会拦，需先点一次）
+  audio.volume = parseFloat(volEl.value);
+  audio.play().catch(()=>{});
+})();
+</script>
+</body>
+</html>
