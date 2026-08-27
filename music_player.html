@@ -132,7 +132,7 @@
   let currentName = '62.mp3';
 
   // ---- Web Audio：AnalyserNode 实时频谱（换曲自动匹配的本质）----
-  let audioCtx, analyser, sourceNode, gainNode, freqData, timeData;
+  let audioCtx, analyser, sourceNode, gainNode, freqData;
   function ensureAudioGraph(){
     if(audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -147,7 +147,6 @@
     analyser.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     freqData = new Uint8Array(analyser.frequencyBinCount);
-    timeData = new Uint8Array(analyser.fftSize);
   }
 
   // ---- 播放 / 暂停（需用户交互才能启动 AudioContext）----
@@ -243,7 +242,6 @@
     }
 
     analyser.getByteFrequencyData(freqData);
-    analyser.getByteTimeDomainData(timeData);
 
     // 根据整体能量轻微偏移色相，让频谱"跟音乐呼吸"
     let sum=0; for(let i=0;i<freqData.length;i++) sum+=freqData[i];
@@ -269,16 +267,6 @@
       ctx.fillRect(x+1, h-bh, bw-2, 2);
     }
 
-    // 中央波形（时域）叠加
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = `hsla(${(hue+200)%360},80%,55%,0.5)`;
-    ctx.beginPath();
-    for(let i=0;i<timeData.length;i++){
-      const x = i/timeData.length*w;
-      const y = (timeData[i]/255)*h;
-      i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
-    }
-    ctx.stroke();
   }
   draw();
 
