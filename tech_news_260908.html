@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日 AI 新闻 · 2026.9.8</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a1a;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'WenQuanYi Micro Hei','Microsoft YaHei','PingFang SC',sans-serif}
+#stage{position:relative;width:1080px;height:1920px;background:#000;overflow:hidden}
+canvas{display:block;width:1080px;height:1920px}
+#controls{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);display:flex;gap:24px;z-index:10}
+#controls button{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;width:72px;height:72px;border-radius:50%;cursor:pointer;font-size:30px;transition:0.3s;backdrop-filter:blur(5px)}
+#controls button:hover{background:rgba(102,126,234,0.4);border-color:rgba(102,126,234,0.6)}
+#progress-outer{position:absolute;bottom:170px;left:90px;right:90px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;z-index:10}
+#progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:3px}
+#status{position:absolute;bottom:280px;left:0;right:0;text-align:center;z-index:10;font-size:26px;color:rgba(255,255,255,0.4);font-family:'WenQuanYi Micro Hei',sans-serif;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="stage">
+<canvas id="canvas"></canvas>
+<div id="progress-outer"><div id="progress-bar"></div></div>
+<div id="status">&#9654; 点击播放</div>
+<div id="controls">
+<button id="playBtn">&#9654;</button>
+<button id="replayBtn">&#8634;</button>
+</div>
+</div>
+<script>
+var S=[
+{"id":"cover","tag":"今日AI新闻","title":"今日 AI 新闻","points":["2026年9月8日 · 六条全球要闻"],"color":"#667eea"},
+{"id":"n1","tag":"AI 编程","title":"Cognition 估值480亿美元","points":["估值较上轮翻倍","AI编程并非赢家通吃","智能体改写软件开发"],"color":"#6c5ce7"},
+{"id":"n2","tag":"AI 代理","title":"Meta 发布 Muse AI 代理","points":["消费者级AI助理","信任成最大考验","十亿级用户入口"],"color":"#00b894"},
+{"id":"n3","tag":"AI 争议","title":"OpenAI 被指数学竞赛不公","points":["NYU数学家公开指控","AI竞赛公平性存疑","学术信任面临考验"],"color":"#e17055"},
+{"id":"n4","tag":"云计算","title":"Google Cloud 联手埃森哲","points":["企业级AI部署提速","云厂商军备竞赛升级","Gemini进核心业务"],"color":"#fdcb6e"},
+{"id":"n5","tag":"融资","title":"Mistral 融资30亿欧元","points":["欧洲主权AI标志事件","资金投入算力与研发","全球AI版图重塑"],"color":"#a29bfe"},
+{"id":"n6","tag":"AI 安全","title":"Chrome 改为两周更新","points":["AI改变攻防节奏","以快制快防新威胁","软件进入快迭代时代"],"color":"#fd79a8"},
+{"id":"outro","tag":"","title":"感谢您的收看","points":["明日再见"],"color":"#667eea"}];
+
+var SEG_START=[0,7.08,42.84,79.49,116.64,151.13,185.47,217.22];
+var DURS=[7.08,35.76,36.65,37.15,34.49,34.34,31.75,3.14];
+var TOT=220.36;
+
+var C=document.getElementById("canvas"),X=C.getContext("2d"),W=1080,H=1920;
+C.width=W;C.height=H;
+var B=document.getElementById("playBtn"),R=document.getElementById("replayBtn"),PB=document.getElementById("progress-bar"),ST=document.getElementById("status");
+var aCtx=null,src=null,playing=false,finished=false,idx=0,curT=0,lastTS=0,raf=null,AC={};
+
+// ===== 粒子（确定性）=====
+var P=[];
+(function(){for(var i=0;i<90;i++)P.push({x:((i*137.5)%W)+Math.sin(i)*30,y:((i*211.3)%H),s:Math.random()*3+1,yv:-Math.random()*0.9-0.3,xv:(Math.random()-0.5)*0.6,o:Math.random()*0.5+0.12})})();
+function updP(){for(var i=0;i<P.length;i++){var p=P[i];p.y+=p.yv;p.x+=p.xv;if(p.y<-8){p.y=H+8;p.x=Math.random()*W}}}
+function drawP(){X.save();for(var i=0;i<P.length;i++){var p=P[i];X.fillStyle="rgba(255,255,255,"+p.o+")";X.beginPath();X.arc(p.x,p.y,p.s,0,Math.PI*2);X.fill()}X.restore()}
+
+// ===== 音频缓存与播放 =====
+function loadAudio(id,cb){
+  if(AC[id]){if(cb)cb();return}
+  var x=new XMLHttpRequest();
+  x.open("GET","seg_"+id+".mp3",true);
+  x.responseType="arraybuffer";
+  x.onload=function(){AC[id]=x.response;if(cb)cb()};
+  x.onerror=function(){ST.textContent="⚠ 加载失败: seg_"+id+".mp3";if(cb)cb()};
+  x.send();
+}
+function playSegment(n){
+  if(finished||n>=S.length){playing=false;finished=false;B.textContent="\u25B6";curT=0;return}
+  idx=n;
+  var g=S[n],buf=AC[g.id];
+  if(!buf){loadAudio(g.id,function(){playSegment(n)});return}
+  if(!aCtx)aCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(aCtx.state==="suspended")aCtx.resume();
+  aCtx.decodeAudioData(buf.slice(0),function(ad){
+    if(finished)return;
+    var s=aCtx.createBufferSource();s.buffer=ad;s.connect(aCtx.destination);s.start(0);
+    src=s;
+    curT=SEG_START[n];
+    s.onended=function(){if(!finished&&playing)playSegment(n+1)};
+  },function(){if(!finished&&playing)playSegment(n+1)});
+}
+function startPlay(){
+  finished=false;if(!playing){playing=true;B.textContent="\u23F8";ST.textContent="播放中...";playSegment(idx);if(!raf)loop()}
+}
+function stopPlay(){
+  finished=true;playing=false;if(src){try{src.stop()}catch(e){}src=null}
+  B.textContent="\u25B6";ST.textContent="⏸ 已暂停";
+}
+function togglePlay(){
+  if(playing)stopPlay();
+  else{if(idx>=S.length-1){idx=0;curT=0;PB.style.width="0%"}startPlay()}
+}
+function replayAll(){
+  stopPlay();setTimeout(function(){idx=0;curT=0;PB.style.width="0%";startPlay()},100)
+}
+B.onclick=togglePlay;R.onclick=replayAll;
+loadAudio("cover",function(){ST.textContent="✔ 可播放"});
+setTimeout(function(){for(var j=1;j<S.length;j++)(function(id){setTimeout(function(){if(!AC[id])loadAudio(id)},j*200)})(S[j].id)},100);
+
+// ===== 绘制 =====
+function drawBg(){
+  var g=X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#0a0a1a");g.addColorStop(0.5,"#1a1a3e");g.addColorStop(1,"#0a0a1a");
+  X.fillStyle=g;X.fillRect(0,0,W,H)
+}
+function rr(x,y,w,h,r){X.beginPath();X.moveTo(x+r,y);X.arcTo(x+w,y,x+w,y+h,r);X.arcTo(x+w,y+h,x,y+h,r);X.arcTo(x,y+h,x,y,r);X.arcTo(x,y,x+w,y,r);X.closePath()}
+
+function wrapTitle(tl){
+  if(tl.length<=8)return [tl];
+  var mid=Math.ceil(tl.length/2),best=8,bp=mid;
+  for(var i=4;i<tl.length-3;i++){var score=Math.abs(i-mid)+((tl[i]===" "||tl[i]==="·"||tl[i]==="-")?-3:0);if(score<best){best=score;bp=i}}
+  return [tl.slice(0,bp),tl.slice(bp)];
+}
+
+function drawNews(g,t){
+  var cx=W/2,cy=H/2;
+  var g2=X.createRadialGradient(cx,cy-330,10,cx,cy-330,420);
+  g2.addColorStop(0,g.color+"30");g2.addColorStop(1,"transparent");
+  X.fillStyle=g2;X.fillRect(0,0,W,H);
+
+  // 标签 pill
+  var tagA=Math.min(1,t*0.8);
+  if(g.tag){
+    X.save();X.globalAlpha=tagA;
+    X.font='bold 32px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';
+    var tw=X.measureText(g.tag).width+60;
+    rr(cx-tw/2,200,tw,68,34);
+    X.fillStyle=g.color+"22";X.fill();X.strokeStyle=g.color+"AA";X.lineWidth=2;X.stroke();
+    X.textAlign="center";X.textBaseline="middle";
+    X.fillStyle=g.color;X.fillText(g.tag,cx,236);X.restore();
+  }
+
+  // 图标球
+  var ga=Math.min(1,t*0.6);
+  X.save();X.globalAlpha=ga;
+  X.shadowColor=g.color+"80";X.shadowBlur=40;
+  X.beginPath();X.arc(cx,cy-330,66,0,Math.PI*2);X.fillStyle=g.color+"20";X.fill();
+  X.shadowBlur=0;X.beginPath();X.arc(cx,cy-330,62,0,Math.PI*2);X.fillStyle=g.color+"30";X.fill();
+  X.strokeStyle=g.color+"60";X.lineWidth=3;X.stroke();
+  X.font='bold 44px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#fff";X.fillText(g.id==="outro"?"♥":g.id.slice(1),cx,cy-330);
+  X.restore();
+
+  // 大标题（两行）
+  var tA=Math.min(1,Math.max(0,(t-0.2)*0.8));
+  var tY=cy-40;
+  var lines=wrapTitle(g.title);
+  X.save();X.globalAlpha=tA;
+  X.shadowColor="rgba(0,0,0,0.5)";X.shadowBlur=18;
+  X.font='bold 52px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#fff";
+  for(var i=0;i<lines.length;i++){X.fillText(lines[i],cx,tY+i*74)}
+  X.restore();
+
+  // 装饰线
+  X.save();X.globalAlpha=Math.min(1,(t-0.35)*0.8);
+  var lw=140+Math.sin(t*3)*16;
+  X.strokeStyle=g.color+"90";X.lineWidth=4;X.shadowColor=g.color+"40";X.shadowBlur=12;
+  X.beginPath();X.moveTo(cx-lw/2,cy+120);X.lineTo(cx+lw/2,cy+120);X.stroke();X.restore();
+
+  // 要点（3 条，大卡片式）
+  for(var k=0;k<g.points.length;k++){
+    var pA=Math.min(1,Math.max(0,(t-0.6-k*0.35)*0.8));
+    if(pA<=0)continue;
+    var py=cy+210+k*120;
+    X.save();X.globalAlpha=pA;
+    // 卡片底
+    rr(cx-330,py-42,660,88,18);
+    X.fillStyle="rgba(255,255,255,0.05)";X.fill();
+    X.strokeStyle=g.color+"40";X.lineWidth=1.5;X.stroke();
+    // 圆点
+    X.shadowColor=g.color+"70";X.shadowBlur=14;
+    X.beginPath();X.arc(cx-250,py,12,0,Math.PI*2);X.fillStyle=g.color;X.fill();
+    X.shadowBlur=0;
+    X.font='30px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="left";X.textBaseline="middle";
+    X.fillStyle="rgba(255,255,255,0.92)";X.shadowColor="rgba(0,0,0,0.3)";X.shadowBlur=8;
+    X.fillText(g.points[k],cx-210,py);
+    X.restore();
+  }
+
+  // 页码
+  X.save();X.font='24px "WenQuanYi Micro Hei",sans-serif';X.textAlign="center";X.fillStyle="rgba(255,255,255,0.3)";
+  X.fillText(idx+"/"+S.length,W/2,H-340);X.restore();
+  // 进度点
+  S.slice(1,-1).forEach(function(_,j){
+    X.save();X.beginPath();X.arc(cx+(j-(S.length-3)/2)*36+18,H-270,8,0,Math.PI*2);
+    X.fillStyle=j===idx-1?g.color:"rgba(255,255,255,0.2)";
+    X.shadowColor=j===idx-1?g.color+"60":"transparent";X.shadowBlur=j===idx-1?16:0;X.fill();X.restore()
+  });
+}
+
+function drawCover(t){
+  var cx=W/2,cy=H/2,ci=600;
+  var pulse=1+Math.sin(t*2)*0.1;
+  var gGrad=X.createRadialGradient(cx,ci,10,cx,ci,210*pulse);
+  gGrad.addColorStop(0,"rgba(102,126,234,0.7)");
+  gGrad.addColorStop(0.2,"rgba(102,126,234,0.35)");
+  gGrad.addColorStop(0.5,"rgba(118,75,162,0.15)");
+  gGrad.addColorStop(1,"transparent");
+  X.save();X.fillStyle=gGrad;
+  X.beginPath();X.arc(cx,ci,210*pulse,0,Math.PI*2);X.fill();X.restore();
+
+  var ringP=(Math.sin(t*1.5)*0.5+0.5);
+  X.save();X.strokeStyle="rgba(102,126,234,"+(0.3*ringP)+")";X.lineWidth=4*pulse;
+  X.shadowColor="rgba(102,126,234,0.3)";X.shadowBlur=30;
+  X.beginPath();X.arc(cx,ci,140+ringP*90,0,Math.PI*2);X.stroke();X.restore();
+
+  for(var i=0,no=35;i<no;i++){
+    var a=i/no*Math.PI*2+t*0.7;
+    var r=210+Math.sin(t*1.2+i*3)*30;
+    var px=cx+Math.cos(a)*r, py=ci+Math.sin(a)*r*0.35;
+    var sz=3+Math.sin(a*2+t*3)*2.4, al=0.3+Math.sin(a+t*2)*0.3;
+    X.save();X.fillStyle="rgba(130,150,255,"+al+")";
+    X.shadowColor="rgba(102,126,234,"+al*0.6+")";X.shadowBlur=22;
+    X.beginPath();X.arc(px,py,sz,0,Math.PI*2);X.fill();X.restore();
+  }
+  for(var i=0,ni=22;i<ni;i++){
+    var a=i/ni*Math.PI*2-t*0.5;
+    var r=145+Math.sin(t*1.8+i*2)*26;
+    var px=cx+Math.cos(a)*r, py=ci+Math.sin(a)*r*0.35;
+    var sz=2.5+Math.sin(a*3+t*2)*2;
+    X.save();X.fillStyle="rgba(180,120,255,0.4)";
+    X.shadowColor="rgba(118,75,162,0.3)";X.shadowBlur=16;
+    X.beginPath();X.arc(px,py,sz,0,Math.PI*2);X.fill();X.restore();
+  }
+  for(var i=0,ns=10;i<ns;i++){
+    var ba=i/ns*Math.PI*2+t*0.2;
+    for(var j=0;j<6;j++){
+      var d=40+j*50+Math.sin(t*2.5+i+j)*16;
+      var px=cx+Math.cos(ba)*d, py=ci+Math.sin(ba)*d*0.45;
+      var al=0.6-j*0.1, sz=6-j*0.9;
+      X.save();X.fillStyle="rgba(255,255,255,"+al+")";
+      X.shadowColor="rgba(102,126,234,"+al*0.7+")";X.shadowBlur=30;
+      X.beginPath();X.arc(px,py,Math.max(sz,1),0,Math.PI*2);X.fill();X.restore();
+    }
+  }
+
+  var tA=Math.min(1,t*0.5), tY=880-26*Math.exp(-t*2.5);
+  X.save();X.globalAlpha=tA;
+  X.shadowColor="rgba(102,126,234,0.7)";X.shadowBlur=34;
+  X.font='bold 78px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#fff";X.fillText("今日 AI 新闻",cx,tY);X.restore();
+
+  X.save();X.globalAlpha=Math.min(1,(t-0.4)*0.6);
+  X.font='40px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="rgba(255,255,255,0.65)";X.fillText("2026年9月8日",cx,1000);X.restore();
+
+  X.save();X.globalAlpha=Math.min(1,(t-0.8)*0.5);
+  X.font='30px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";
+  X.fillStyle="rgba(255,255,255,0.4)";X.fillText("AI日报 · 每日精选",cx,1090);X.restore();
+}
+
+function drawOutro(t){
+  var cx=W/2,cy=H/2;
+  X.save();X.shadowColor="rgba(0,0,0,0.5)";X.shadowBlur=26;
+  X.font='bold 64px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="#fff";X.fillText("感谢您的收看",cx,cy-90);X.restore();
+  X.save();X.font='36px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";X.textBaseline="middle";
+  X.fillStyle="rgba(255,255,255,0.5)";X.fillText("明日再见",cx,cy+30);X.restore();
+  var pa=Math.sin(t*4)*0.3+0.7;
+  X.save();X.globalAlpha=pa;X.font='26px "WenQuanYi Micro Hei","Microsoft YaHei",sans-serif';X.textAlign="center";
+  X.fillStyle="rgba(255,255,255,0.2)";X.fillText("AI 日报 · 每日 AI 新闻",cx,cy+220);X.restore();
+}
+
+// ===== 主绘制（供渲染脚本与播放循环调用）=====
+function drawAt(tGlobal){
+  X.clearRect(0,0,W,H);drawBg();updP();drawP();
+  var idxNow=0;
+  for(var i=SEG_START.length-1;i>=0;i--){if(tGlobal>=SEG_START[i]){idxNow=i;break}}
+  idx=idxNow;
+  var g=S[idx], tl=tGlobal-SEG_START[idx];
+  if(g.id==="cover")drawCover(tl);
+  else if(g.id==="outro")drawOutro(tl);
+  else drawNews(g,tl);
+
+  var e=Math.min(tGlobal/TOT,1);
+  PB.style.width=(e*100)+"%";
+  X.save();X.font='22px monospace';X.fillStyle="rgba(255,255,255,0.3)";X.textAlign="center";
+  X.fillText((idx+1)+"/"+S.length,W/2,H-60);X.restore();
+}
+window.__drawAt=drawAt;
+
+// ===== 播放循环 =====
+function loop(ts){
+  if(!playing)return;
+  if(!lastTS)lastTS=ts;
+  var dt=(ts-lastTS)/1000;lastTS=ts;
+  if(src&&aCtx){curT=SEG_START[idx]+aCtx.currentTime-0}
+  drawAt(curT);
+  raf=requestAnimationFrame(loop);
+}
+// 首次绘制
+drawAt(0);
+</script>
+</body>
+</html>
